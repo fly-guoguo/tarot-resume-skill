@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#110e0a">
+<title>三问成历 · 职场塔罗</title>
+<meta name="description" content="抽三张牌，沿着反差与价值传导链，把你的日常工作聊成高段位简历与面试防御。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://fly-guoguo.github.io/tarot-resume-skill/">
+<meta property="og:title" content="三问成历 · 抽三张牌，见你的职场价值">
+<meta property="og:description" content="告别填表格，亲手抽取三张职场塔罗，一次一题聊出零编造简历与面试防御。">
+<meta property="og:image" content="https://fly-guoguo.github.io/tarot-resume-skill/cards/card3.jpg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314110d'/%3E%3Crect x='6' y='6' width='52' height='52' rx='10' fill='none' stroke='%23cfa968' stroke-width='2.5'/%3E%3Cpolygon points='32,12 36,28 52,32 36,36 32,52 28,36 12,32 28,28' fill='%23f2d79c'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#110e0a;
+  --ink-2:#1a150f;
+  --ink-3:#241d15;
+  --paper:#f1e6cc;
+  --cream:#e6d8b9;
+  --muted:#9b8a6b;
+  --gold:#cfa968;
+  --gold-bright:#f2d79c;
+  --gold-dim:#7e6944;
+  --line:rgba(207,169,104,.24);
+  --line-strong:rgba(207,169,104,.58);
+  --danger:#d67657;
+  --ok:#86b06a;
+  --serif:"Noto Serif SC","Songti SC","STSong","PingFang SC",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--ink);color:var(--cream);overflow:hidden}
+body{
+  font-family:var(--serif);
+  background:
+    radial-gradient(ellipse 110% 55% at 50% -10%,rgba(207,169,104,.16),transparent 62%),
+    radial-gradient(ellipse 85% 45% at 50% 108%,rgba(207,169,104,.10),transparent 60%),
+    var(--ink);
+}
+
+/* Fullscreen Stardust Particle Canvas */
+#starCanvas{
+  position:fixed;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:60;
+}
+
+#app{
+  max-width:560px;margin:0 auto;height:100dvh;
+  position:relative;z-index:10;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+/* ====== Minimal Floating Top Bar ====== */
+#topbar{
+  flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 16px;min-height:58px;position:relative;z-index:35;
+  border-bottom:1px solid rgba(207,169,104,.12);
+  background:rgba(17,14,10,.88);backdrop-filter:blur(10px);
+  transition:background .35s,border-color .35s;
+}
+#topbar.landing-bar{background:transparent;border-bottom-color:transparent;backdrop-filter:none}
+
+.iconBtn{
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid rgba(207,169,104,.38);background:rgba(28,23,17,.72);
+  color:var(--gold);font-size:15px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:.2s;flex:none;
+}
+.iconBtn:hover{border-color:var(--gold-bright);background:rgba(46,37,25,.9);color:var(--gold-bright)}
+.iconBtn.connected{border-color:var(--ok);box-shadow:0 0 0 2px rgba(134,176,106,.32)}
+
+/* 3-Card Live Tarot Tray (Visual Progress — Zero Redundant Text) */
+#tray{display:none;align-items:center;justify-content:center;gap:14px;flex:1}
+#tray.show{display:flex}
+.traySlot{
+  background:none;border:none;padding:0;cursor:default;
+  display:flex;align-items:center;gap:6px;
+  color:var(--gold-dim);font-family:var(--serif);font-size:11.5px;letter-spacing:.1em;
+  opacity:.48;transition:.25s;
+}
+.traySlot.unlocked{cursor:pointer;opacity:.88}
+.traySlot.unlocked:hover{opacity:1;color:var(--paper)}
+.traySlot.active{opacity:1;color:var(--gold-bright)}
+.trayMini{width:26px;height:36px;border-radius:4px;position:relative;perspective:420px;flex:none}
+.trayMiniInner{
+  position:absolute;inset:0;transform-style:preserve-3d;
+  transition:transform .7s cubic-bezier(.22,.9,.3,1);
+  transform:rotateY(180deg);
+}
+.traySlot.revealed .trayMiniInner{transform:rotateY(0deg)}
+.trayFace{
+  position:absolute;inset:0;border-radius:4px;backface-visibility:hidden;
+  border:1px solid var(--gold-dim);overflow:hidden;background:#18130d;
+}
+.traySlot.active .trayFace.front{border-color:var(--gold-bright);box-shadow:0 0 12px rgba(242,215,156,.58)}
+.traySlot.done .trayFace.front{border-color:var(--ok)}
+.trayFace.front img{width:100%;height:100%;object-fit:cover;display:block}
+.trayFace.back{
+  transform:rotateY(180deg);
+  background:radial-gradient(circle at 50% 50%,#2c2317 0%,#130f0b 100%);
+  border-color:rgba(207,169,104,.48);
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);
+}
+
+#topRight{display:flex;align-items:center;gap:8px;flex:none}
+.ghostPill{
+  font-family:var(--serif);font-size:12px;letter-spacing:.12em;
+  padding:6px 13px;border-radius:999px;
+  border:1px solid rgba(207,169,104,.4);background:rgba(28,23,17,.65);
+  color:var(--gold-bright);cursor:pointer;transition:.2s;white-space:nowrap;
+}
+.ghostPill:hover{border-color:var(--gold-bright);background:rgba(207,169,104,.16)}
+.ghostPill.subtle{border-color:transparent;background:none;color:var(--muted);padding:6px 4px;font-size:11.5px;text-decoration:underline dotted}
+.ghostPill.subtle:hover{color:var(--gold-bright);background:none}
+.hide{display:none !important}
+
+/* ====== Stage & Screens ====== */
+#stage{flex:1;min-height:0;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* ====== Screen 1: Breathless Minimal Landing + Living Cardistry Table ====== */
+#landing{
+  align-items:center;text-align:center;
+  padding:10px 18px 26px;justify-content:space-between;
+}
+.heroHead{margin-top:2dvh;pointer-events:none;transition:opacity .45s,transform .45s}
+.heroHead h1{
+  font-size:32px;font-weight:600;letter-spacing:.18em;text-indent:.18em;
+  color:var(--paper);text-shadow:0 6px 28px rgba(0,0,0,.7);
+}
+.heroHead p{
+  margin-top:8px;font-size:13px;letter-spacing:.24em;text-indent:.24em;
+  color:var(--gold);opacity:.9;
+}
+
+/* Living 18-card Cardistry & Pick Arena */
+#tableArena{
+  position:relative;width:100%;flex:1;min-height:360px;
+  perspective:1300px;
+  display:flex;align-items:center;justify-content:center;
+  touch-action:none;
+}
+#magicCircle{
+  position:absolute;width:290px;height:290px;border-radius:50%;
+  border:1px solid rgba(207,169,104,.14);
+  box-shadow:inset 0 0 60px rgba(207,169,104,.07);
+  pointer-events:none;opacity:.65;
+  transition:transform 1s ease,opacity .6s ease,border-color .6s ease;
+}
+#magicCircle::before{
+  content:"";position:absolute;inset:18px;border-radius:50%;
+  border:1px dashed rgba(207,169,104,.24);
+  animation:slowSpin 32s linear infinite;
+}
+#magicCircle::after{
+  content:"";position:absolute;inset:54px;border-radius:50%;
+  border:1px solid rgba(207,169,104,.12);
+}
+#tableArena.flourishing #magicCircle{
+  opacity:1;border-color:rgba(242,215,156,.45);transform:scale(1.08);
+}
+#tableArena.flourishing #magicCircle::before{animation-duration:4s}
+@keyframes slowSpin{to{transform:rotate(360deg)}}
+
+/* Dynamic Deck Cards */
+.dCard{
+  position:absolute;
+  width:116px;height:156px;
+  transform-style:preserve-3d;
+  will-change:transform,opacity;
+  transition:transform .58s cubic-bezier(.22,.88,.26,1),opacity .35s ease,filter .3s ease;
+  user-select:none;
+}
+.dCard.pickable{cursor:pointer}
+.dCardInner{
+  position:absolute;inset:0;transform-style:preserve-3d;
+  transition:transform .78s cubic-bezier(.22,.92,.28,1);
+  transform:rotateY(180deg); /* face-down by default! */
+}
+.dCard.faceup .dCardInner{transform:rotateY(0deg)}
+.dFace{
+  position:absolute;inset:0;border-radius:10px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  overflow:hidden;
+}
+.dFront{
+  border:1.5px solid var(--gold-bright);background:#1b1610;
+  box-shadow:0 22px 54px rgba(0,0,0,.78),0 0 34px rgba(242,215,156,.34),inset 0 0 0 4px rgba(207,169,104,.28);
+}
+.dFront img{
+  position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);
+  object-fit:cover;border-radius:6px;display:block;background:var(--paper);
+}
+.dFront .sheen{
+  position:absolute;inset:0;
+  background:linear-gradient(122deg,rgba(255,248,225,.24) 0%,transparent 35%,transparent 65%,rgba(12,9,5,.25) 100%);
+  pointer-events:none;
+}
+.dBack{
+  transform:rotateY(180deg);
+  border:1.5px solid rgba(207,169,104,.75);background:#16110c;
+  box-shadow:0 14px 32px rgba(0,0,0,.68),inset 0 0 0 3px rgba(207,169,104,.22);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s,box-shadow .25s;
+}
+.dBack svg{width:calc(100% - 10px);height:calc(100% - 10px);display:block}
+.dCard.hovered .dBack{
+  border-color:var(--gold-bright);
+  box-shadow:0 22px 44px rgba(0,0,0,.8),0 0 24px rgba(242,215,156,.45),inset 0 0 0 3px rgba(242,215,156,.42);
+}
+.dCard.dissolving{opacity:0;pointer-events:none;transition:transform .34s ease-out,opacity .26s ease-out}
+
+/* Whisper cue at bottom of arena — 4 chars, zero clutter */
+#tableWhisper{
+  height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  pointer-events:none;
+}
+#whisperText{
+  font-size:14px;letter-spacing:.38em;text-indent:.38em;
+  color:var(--gold-bright);transition:opacity .35s;
+  animation:softPulse 2.4s ease-in-out infinite;
+}
+@keyframes softPulse{0%,100%{opacity:.55}50%{opacity:1}}
+#reshuffleBtn{
+  pointer-events:auto;margin-top:4px;
+  font-family:var(--serif);font-size:11.5px;letter-spacing:.18em;
+  color:var(--muted);background:none;border:none;cursor:pointer;
+  transition:color .2s,opacity .3s;opacity:.8;
+}
+#reshuffleBtn:hover{color:var(--gold-bright);opacity:1}
+
+/* ====== Reusable Draw Overlay (For Picking Card II & Card III Yourself!) ====== */
+#drawModal{
+  position:absolute;inset:0;z-index:45;
+  background:radial-gradient(circle at 50% 48%,rgba(30,24,16,.95),rgba(13,10,7,.98));
+  backdrop-filter:blur(8px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;text-align:center;
+}
+#drawModal.show{display:flex;animation:fadeIn .32s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#drawHeading{font-size:12px;letter-spacing:.34em;text-indent:.34em;color:var(--gold);margin-bottom:6px}
+#drawPrompt{font-size:21px;color:var(--paper);letter-spacing:.12em;font-weight:600;margin-bottom:8px}
+#drawArena{
+  position:relative;width:100%;height:310px;
+  perspective:1200px;display:flex;align-items:center;justify-content:center;
+  touch-action:none;
+}
+#drawWhisper{
+  font-size:13px;letter-spacing:.3em;text-indent:.3em;color:var(--gold-bright);
+  margin-top:6px;animation:softPulse 2.2s ease-in-out infinite;
+}
+/* Revealed card caption shown smoothly after flip */
+#revealCaption{
+  min-height:48px;margin-top:8px;opacity:0;transform:translateY(8px);
+  transition:opacity .45s ease,transform .45s ease;pointer-events:none;
+}
+#revealCaption.show{opacity:1;transform:none}
+#revealCaption b{display:block;font-size:18px;letter-spacing:.14em;color:var(--gold-bright)}
+#revealCaption span{display:block;font-family:var(--sans);font-size:12.5px;color:#cbb995;margin-top:4px}
+
+/* Demo Sparkle Pointer */
+#demoSpark{
+  position:fixed;width:22px;height:22px;border-radius:50%;
+  background:radial-gradient(circle,#fff6dc 0%,#f2d79c 38%,transparent 72%);
+  box-shadow:0 0 18px 4px rgba(242,215,156,.65);
+  pointer-events:none;z-index:80;opacity:0;
+  transform:translate(-50%,-50%);
+  transition:left .48s cubic-bezier(.22,.85,.32,1),top .48s cubic-bezier(.22,.85,.32,1),opacity .25s;
+}
+#demoSpark.show{opacity:1}
+
+/* ====== Screen 2: Laser-Focused Conversational Reading Console ====== */
+#reading{display:none;flex-direction:column}
+#reading.active{display:flex}
+
+/* Live Tilting Justice Scale (Pure Visual Feedback during Card II) */
+#scaleWidget{
+  display:none;align-items:center;gap:12px;
+  padding:8px 16px;
+  background:rgba(24,19,14,.9);
+  border-bottom:1px solid rgba(207,169,104,.16);
+}
+#scaleWidget.show{display:flex;animation:fadeIn .35s ease}
+.scaleSvgWrap{width:50px;height:38px;flex:none}
+.scaleBeamGrp{transform-origin:25px 10px;transition:transform .65s cubic-bezier(.22,.92,.3,1)}
+.scaleMeta{flex:1;min-width:0}
+.scaleTop{display:flex;justify-content:space-between;align-items:center;font-family:var(--sans);font-size:11.5px;color:var(--paper);margin-bottom:4px}
+.scaleState{font-size:11px;color:var(--gold-bright)}
+.scaleDots{display:flex;gap:5px;flex-wrap:wrap}
+
+#chatStream{
+  flex:1;min-height:0;overflow-y:auto;
+  padding:16px 16px 20px;
+  display:flex;flex-direction:column;gap:12px;
+  scroll-behavior:smooth;-webkit-overflow-scrolling:touch;
+}
+.msg{
+  max-width:90%;animation:msgIn .32s cubic-bezier(.22,.9,.3,1);
+  line-height:1.72;font-family:var(--sans);font-size:14.2px;
+}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg.bot{
+  align-self:flex-start;
+  background:linear-gradient(180deg,rgba(35,28,20,.94),rgba(25,20,14,.94));
+  border:1px solid var(--line);border-radius:4px 14px 14px 14px;
+  padding:11px 14px;color:#eadec4;
+}
+.msg.bot .botTag{
+  font-family:var(--serif);font-size:10.5px;letter-spacing:.18em;color:var(--gold);
+  margin-bottom:4px;opacity:.92;
+}
+.msg.bot b{color:var(--gold-bright);font-weight:600}
+.msg.bot .hintSub{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.msg.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,rgba(207,169,104,.24),rgba(176,138,76,.14));
+  border:1px solid rgba(207,169,104,.46);border-radius:14px 4px 14px 14px;
+  padding:9px 14px;color:var(--paper);white-space:pre-line;
+}
+.msg.cardMsg{
+  align-self:stretch;max-width:100%;
+  background:linear-gradient(180deg,rgba(32,26,18,.96),rgba(22,18,13,.96));
+  border:1px solid var(--line-strong);border-radius:12px;padding:13px 14px;
+  box-shadow:0 10px 28px rgba(0,0,0,.38);
+}
+.cardMsgHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap}
+.cardMsgHead h4{font-family:var(--serif);font-size:13.5px;color:var(--gold-bright);letter-spacing:.12em}
+.scopeList{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.scopeRow{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  background:rgba(17,14,10,.68);border:1px solid rgba(207,169,104,.16);
+  font-family:var(--sans);font-size:12.5px;
+}
+.scopeRow.core{border-color:rgba(207,169,104,.55);background:rgba(207,169,104,.09)}
+.scopeRow b{color:var(--paper);display:block;font-size:13px}
+.scopeRow span{color:var(--muted);font-size:11.8px;line-height:1.45;display:block;margin-top:2px}
+.prioPill{
+  flex:none;font-family:var(--sans);font-size:10.5px;padding:3px 9px;border-radius:999px;
+  border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;transition:.15s;
+}
+.prioPill.core{border-color:var(--gold-bright);background:rgba(207,169,104,.2);color:var(--gold-bright)}
+.roleBar{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(207,169,104,.18);align-items:center}
+.chip{
+  font-family:var(--sans);font-size:10.5px;padding:2px 8px;border-radius:999px;
+  border:1px solid var(--line);color:var(--muted);display:inline-flex;align-items:center;
+}
+.chip.on{border-color:var(--ok);color:#daf0c6;background:rgba(134,176,106,.16)}
+.chip.btnChip{cursor:pointer;background:rgba(207,169,104,.05);color:var(--cream);border-style:dashed}
+.chip.btnChip.active{border-style:solid;border-color:var(--gold-bright);background:rgba(207,169,104,.22);color:var(--gold-bright)}
+
+.typingDots{display:inline-flex;gap:4px;align-items:center;padding:3px 2px}
+.typingDots i{width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:.35;animation:dotPulse 1.1s infinite}
+.typingDots i:nth-child(2){animation-delay:.18s}
+.typingDots i:nth-child(3){animation-delay:.36s}
+@keyframes dotPulse{0%,80%,100%{opacity:.25;transform:scale(.85)}40%{opacity:1;transform:scale(1.18)}}
+
+/* Bottom Single-Input Composer */
+#composerArea{
+  flex:none;background:rgba(17,14,10,.96);
+  border-top:1px solid rgba(207,169,104,.2);
+  padding:8px 14px 12px;
+}
+#quickChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;max-height:80px;overflow-y:auto}
+#quickChips:empty{display:none}
+.qPill{
+  font-family:var(--sans);font-size:12px;padding:5px 11px;border-radius:999px;
+  border:1px solid rgba(207,169,104,.38);background:rgba(34,27,19,.92);
+  color:#e8d9b8;cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.qPill:hover{border-color:var(--gold-bright);background:rgba(207,169,104,.2)}
+.qPill:active{transform:scale(.96)}
+.qPill.action{
+  border-color:var(--gold-bright);
+  background:linear-gradient(180deg,rgba(242,215,156,.28),rgba(207,169,104,.12));
+  color:var(--gold-bright);font-weight:500;
+}
+.qPill.subtle{border-style:dashed;border-color:rgba(207,169,104,.26);color:var(--muted);background:transparent}
+.composerRow{display:flex;align-items:flex-end;gap:8px}
+#chatInput{
+  flex:1;min-height:42px;max-height:120px;
+  background:var(--ink-2);border:1px solid var(--line-strong);border-radius:12px;
+  color:var(--paper);font-family:var(--sans);font-size:14px;line-height:1.55;
+  padding:9px 12px;outline:none;resize:none;overflow-y:auto;transition:.2s;
+}
+#chatInput:focus{border-color:var(--gold-bright);box-shadow:0 0 0 3px rgba(207,169,104,.16)}
+#chatInput::placeholder{color:#6f624c}
+#sendBtn{
+  flex:none;height:42px;padding:0 16px;border-radius:12px;
+  border:1px solid var(--gold);
+  background:linear-gradient(180deg,rgba(207,169,104,.32),rgba(207,169,104,.12));
+  color:var(--gold-bright);font-family:var(--serif);font-size:13.5px;letter-spacing:.12em;
+  cursor:pointer;transition:.15s;
+}
+#sendBtn:hover{background:linear-gradient(180deg,rgba(207,169,104,.44),rgba(207,169,104,.18))}
+#sendBtn:disabled{opacity:.4;pointer-events:none}
+
+/* ====== Screen 3: Final Offer Spread ====== */
+#result{padding:12px 20px 28px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#result.active{display:flex;animation:screenIn .45s cubic-bezier(.22,.9,.3,1)}
+@keyframes screenIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.qLabel{text-align:center;font-size:11px;letter-spacing:.3em;color:var(--gold);text-indent:.3em}
+.qTitle{text-align:center;font-size:20px;font-weight:600;margin:5px 0 10px;color:var(--paper);letter-spacing:.08em}
+.spreadTriad{display:flex;justify-content:center;align-items:center;gap:12px;margin:2px 0 14px}
+.spreadCard{width:72px;height:96px;border-radius:8px;border:1.5px solid var(--gold-dim);background:#1b1610;padding:3px;box-shadow:0 8px 18px rgba(0,0,0,.5)}
+.spreadCard.crown{border-color:var(--gold-bright);box-shadow:0 10px 28px rgba(0,0,0,.65),0 0 24px rgba(242,215,156,.38);transform:translateY(-4px)}
+.spreadCard img{width:100%;height:100%;object-fit:cover;border-radius:4px;display:block;background:var(--paper)}
+.archetypeBox{background:linear-gradient(135deg,rgba(207,169,104,.16),rgba(26,21,15,.94));border:1px solid var(--line-strong);border-radius:12px;padding:13px 16px;text-align:center;margin-bottom:6px}
+.archTitle{font-size:16px;color:var(--gold-bright);font-weight:600;letter-spacing:.08em}
+.archSub{font-family:var(--sans);font-size:12.5px;color:#dfd1b3;line-height:1.65;margin-top:4px}
+.section{margin-top:18px}
+.section>h3{font-size:13px;letter-spacing:.2em;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bullets{list-style:none}
+.bullets li{position:relative;padding:0 0 0 16px;margin-bottom:12px;font-family:var(--sans);font-size:13.8px;line-height:1.85;color:#e5d8ba}
+.bullets li::before{content:"◆";position:absolute;left:0;top:7px;font-size:7px;color:var(--gold)}
+.bullets .pos{font-family:var(--serif);color:var(--paper);font-weight:600;font-size:15px}
+.ph{display:inline-block;vertical-align:baseline;color:#f3a88e;border-bottom:1px dashed var(--danger);background:rgba(214,118,87,.16);padding:0 6px;border-radius:4px;font-size:.92em;line-height:1.55;cursor:pointer;transition:.15s}
+.ph:hover{background:rgba(214,118,87,.3)}
+.ph::after{content:" ✎";font-size:.82em;opacity:.85}
+.btn{font-family:var(--serif);display:block;width:100%;margin-top:12px;padding:12px 16px;text-align:center;font-size:14px;letter-spacing:.18em;text-indent:.18em;border-radius:10px;border:1px solid var(--gold);background:linear-gradient(180deg,rgba(207,169,104,.24),rgba(207,169,104,.09));color:var(--gold-bright);cursor:pointer;transition:.18s}
+.btn:hover{border-color:var(--gold-bright);background:linear-gradient(180deg,rgba(207,169,104,.34),rgba(207,169,104,.14))}
+.btn.ghost{background:none;border-color:var(--line);color:var(--muted);font-size:13px;padding:10px 14px;letter-spacing:.12em;text-indent:.12em}
+.btn.ghost:hover{border-color:var(--gold-dim);color:var(--cream)}
+.btn:disabled,.btn.loading{opacity:.5;pointer-events:none}
+.copyBtn{width:auto;padding:5px 13px;font-size:11.5px;margin:0;letter-spacing:.1em;text-indent:0;border-radius:999px;background:rgba(207,169,104,.08);flex:none}
+.projBlock{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.projBlock .pn{color:var(--paper);font-weight:600;font-size:15px}
+.projBlock .pt{font-family:var(--sans);color:var(--gold);font-size:12px;margin:4px 0 8px}
+.projBlock .ps{font-family:var(--sans);font-size:13.5px;line-height:1.85;color:#e5d8ba;white-space:pre-line}
+.metricChips{display:flex;flex-wrap:wrap;gap:6px}
+.metricChips span{font-family:var(--sans);font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--gold);color:var(--gold-bright);background:rgba(207,169,104,.1)}
+.diag li{display:flex;gap:8px;align-items:baseline;padding-left:0}
+.diag li::before{display:none}
+.diag .todo{flex:none;color:#f3a88e;font-size:10.5px;border:1px solid rgba(214,118,87,.55);border-radius:4px;padding:1px 6px}
+.diag .where{color:var(--muted);font-size:12px}
+.refineRow{display:flex;gap:8px;margin-top:14px}
+.refineRow input{flex:1;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;color:var(--paper);font-family:var(--sans);font-size:13px;padding:10px 12px;outline:none}
+.refineRow input:focus{border-color:var(--gold)}
+.refineRow .btn{margin:0;width:auto;padding:9px 14px;font-size:12.5px;letter-spacing:.1em;text-indent:0}
+.btnRow{display:flex;gap:10px}.btnRow .btn{flex:1;margin-top:0}
+.resActions{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.resActions .btn{margin-top:0}
+.skillPromo{margin-top:16px;padding:11px 14px;border-radius:10px;border:1px dashed var(--line);background:rgba(26,21,15,.6);font-family:var(--sans);font-size:12px;line-height:1.65;color:var(--muted)}
+.skillPromo summary{color:var(--gold);cursor:pointer;font-family:var(--serif);letter-spacing:.08em}
+footer{margin-top:auto;text-align:center;padding:20px 0 8px;font-size:11px;letter-spacing:.12em;color:#62553f;line-height:1.9}
+
+/* ====== Native Dialogs ====== */
+dialog.tarotModal{margin:auto;padding:0;border:none;background:transparent;max-width:410px;width:calc(100% - 32px);color:var(--cream)}
+dialog.tarotModal::backdrop{background:rgba(10,8,5,.78);backdrop-filter:blur(4px)}
+.modalCard{background:var(--ink-3);border:1px solid var(--gold);border-radius:14px;padding:20px;max-height:85dvh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.74)}
+.modalCard h3{font-size:15px;letter-spacing:.18em;color:var(--gold-bright);margin-bottom:8px}
+.modalCard label{display:block;font-family:var(--sans);font-size:12px;color:#cbb995;margin:11px 0 4px}
+.modalCard input{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:13.5px;padding:10px 11px;outline:none}
+.modalCard input:focus{border-color:var(--gold)}
+.pwWrap{display:flex;gap:6px;align-items:center}
+.pwWrap input{flex:1}
+.pwWrap button{flex:none;height:40px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--ink);color:var(--gold);cursor:pointer;font-size:13px}
+.sRow{display:flex;gap:10px;margin-top:14px}.sRow .btn{flex:1;margin-top:0}
+.sNote{font-family:var(--sans);font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:8px}
+#cfgStatus{color:var(--gold-bright)}
+
+#toast{
+  position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(16px);
+  background:#2a2216;color:var(--gold-bright);border:1px solid var(--gold);
+  padding:8px 18px;border-radius:999px;font-family:var(--sans);font-size:12.5px;
+  opacity:0;pointer-events:none;transition:.28s;z-index:99;max-width:86vw;text-align:center;
+  box-shadow:0 10px 28px rgba(0,0,0,.6);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:420px){
+  .dCard{width:98px;height:132px}
+  .traySlot span:last-child{display:none}
+  #tray{gap:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<canvas id="starCanvas" aria-hidden="true"></canvas>
+<div id="demoSpark" aria-hidden="true"></div>
+
+<div id="app">
+  <header id="topbar" class="landing-bar">
+    <button class="iconBtn" id="settingsBtn" type="button" title="接入大模型（BYOK）" aria-label="接入大模型">⚙</button>
+
+    <nav id="tray" aria-label="牌阵进度">
+      <button class="traySlot" type="button" data-card="0">
+        <span class="trayMini"><span class="trayMiniInner"><span class="trayFace front"><img id="trImg0" alt=""></span><span class="trayFace back">✦</span></span></span>
+        <span class="trayName" id="trName0">I</span>
+      </button>
+      <button class="traySlot" type="button" data-card="1">
+        <span class="trayMini"><span class="trayMiniInner"><span class="trayFace front"><img id="trImg1" alt=""></span><span class="trayFace back">✦</span></span></span>
+        <span class="trayName" id="trName1">II</span>
+      </button>
+      <button class="traySlot" type="button" data-card="2">
+        <span class="trayMini"><span class="trayMiniInner"><span class="trayFace front"><img id="trImg2" alt=""></span><span class="trayFace back">✦</span></span></span>
+        <span class="trayName" id="trName2">III</span>
+      </button>
+    </nav>
+
+    <div id="topRight">
+      <button class="ghostPill" id="demoBtn" type="button">▶ 演示</button>
+      <button class="ghostPill hide" id="skipDemoBtn" type="button">⚡ 直达结果</button>
+      <button class="ghostPill subtle hide" id="restart" type="button">重抽</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <!-- Screen 1: Minimalist Living Cardistry Table -->
+    <section class="screen active" id="landing">
+      <div class="heroHead">
+        <h1>三问成历</h1>
+        <p>抽三张牌 · 见你的价值</p>
+      </div>
+
+      <div id="tableArena">
+        <div id="magicCircle"></div>
+      </div>
+
+      <div id="tableWhisper">
+        <div id="whisperText">洗牌中…</div>
+        <button id="reshuffleBtn" type="button" class="hide">↻ 重新花式洗牌</button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Pure Conversational Reading Console (ZERO FORMS) -->
+    <section class="screen" id="reading">
+      <div id="scaleWidget">
+        <div class="scaleSvgWrap" aria-hidden="true">
+          <svg viewBox="0 0 50 38" width="50" height="38" fill="none">
+            <line x1="25" y1="6" x2="25" y2="33" stroke="#cfa968" stroke-width="1.8"/>
+            <path d="M16 34h18" stroke="#cfa968" stroke-width="2" stroke-linecap="round"/>
+            <g class="scaleBeamGrp" id="scaleBeamGrp" style="transform:rotate(-16deg)">
+              <line x1="7" y1="10" x2="43" y2="10" stroke="#f2d79c" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M7 10L3 20h8L7 10z" stroke="#9b8a6b" stroke-width="1.2" fill="rgba(155,138,107,.18)"/>
+              <path d="M43 10l-4 10h8l-4-10z" stroke="#f2d79c" stroke-width="1.2" fill="rgba(207,169,104,.24)"/>
+            </g>
+            <circle cx="25" cy="10" r="2.3" fill="#f2d79c"/>
+          </svg>
+        </div>
+        <div class="scaleMeta">
+          <div class="scaleTop">
+            <span id="scaleName">正在称重</span>
+            <span class="scaleState" id="scaleState">左盘过重</span>
+          </div>
+          <div class="scaleDots" id="scaleDots"></div>
+        </div>
+      </div>
+
+      <div id="chatStream" aria-live="polite"></div>
+
+      <div id="composerArea">
+        <div id="quickChips"></div>
+        <div class="composerRow">
+          <textarea id="chatInput" rows="1" placeholder="直接说…"></textarea>
+          <button id="sendBtn" type="button">发送 ✦</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Final Offer Spread -->
+    <section class="screen" id="result">
+      <div class="qLabel">THE OFFER SPREAD</div>
+      <div class="qTitle">你的这段职业经历</div>
+      <div class="spreadTriad" aria-hidden="true">
+        <div class="spreadCard"><img id="sp1" alt=""></div>
+        <div class="spreadCard"><img id="sp2" alt=""></div>
+        <div class="spreadCard crown"><img id="sp3" alt=""></div>
+      </div>
+      <div class="archetypeBox" id="archetypeBox"></div>
+
+      <div class="section">
+        <h3><span>◆ 工作经历</span><button class="btn copyBtn" id="copyWork" type="button">复制</button></h3>
+        <ul class="bullets" id="workList"></ul>
+      </div>
+
+      <div class="section">
+        <h3><span>◆ 代表性项目</span><button class="btn copyBtn" id="copyProj" type="button">复制</button></h3>
+        <div id="projList"></div>
+      </div>
+
+      <div class="section" id="metricSec">
+        <h3><span>◆ 量化成果库</span></h3>
+        <div class="metricChips" id="metricList"></div>
+      </div>
+
+      <div class="section">
+        <h3><span>◆ 缺口清单</span></h3>
+        <ul class="bullets diag" id="gapList"></ul>
+      </div>
+
+      <div class="section" id="defSec">
+        <h3><span>◆ 面试防御</span></h3>
+        <ul class="bullets" id="defList"></ul>
+      </div>
+
+      <div class="refineRow">
+        <input type="text" id="refineInput" placeholder="输入想微调的方向（接入大模型可用）…">
+        <button class="btn" id="refineBtn" type="button">微 调</button>
+      </div>
+
+      <div class="resActions">
+        <button class="btn" id="copyAll" type="button">✦ 复制整份简历</button>
+        <div class="btnRow">
+          <button class="btn ghost" id="backToChatBtn" type="button">← 回看对话</button>
+          <button class="btn ghost" id="moreProjBtn" type="button">＋ 再抽一个项目</button>
+        </div>
+      </div>
+
+      <details class="skillPromo">
+        <summary>✦ 安装同名 Agent Skill（tarot-resume-skill）</summary>
+        <div style="margin-top:6px">从 <a href="https://github.com/fly-guoguo/tarot-resume-skill" target="_blank" rel="noopener" style="color:var(--gold-bright);text-decoration:underline">GitHub 仓库</a>下载后放入 <code>~/.claude/skills/</code> 或任意支持 Agent Skills 的宿主，直接说「帮我写简历」即可开启完整深度追问。</div>
+      </details>
+
+      <footer>三问成历 · 牌只说实话，从不替你编故事<br><span id="engineNote">本地引擎 · 点左上 ⚙ 接入大模型</span></footer>
+    </section>
+
+    <!-- User-Picked Card Draw Overlay (for Card II & Card III) -->
+    <div id="drawModal">
+      <div id="drawHeading">SECOND ARCANA</div>
+      <div id="drawPrompt">选出你的第二张牌</div>
+      <div id="drawArena"></div>
+      <div id="drawWhisper">✦ 凭直觉点选一张 ✦</div>
+      <div id="revealCaption"><b id="revCapTitle"></b><span id="revCapSub"></span></div>
+    </div>
+  </main>
+</div>
+
+<!-- Settings Dialog -->
+<dialog id="settingsDlg" class="tarotModal">
+  <div class="modalCard">
+    <h3>✦ 接入大模型（BYOK）</h3>
+    <p class="sNote">密钥仅存本机浏览器，直连 OpenAI 兼容接口（DeepSeek 等）。留空则使用本地深度演示引擎。</p>
+    <label for="cfgBase">API 地址</label>
+    <input type="text" id="cfgBase" placeholder="https://api.deepseek.com/v1">
+    <label for="cfgModel">模型</label>
+    <input type="text" id="cfgModel" placeholder="deepseek-chat">
+    <label for="cfgKey">API Key</label>
+    <div class="pwWrap">
+      <input type="password" id="cfgKey" placeholder="sk-..." autocomplete="off">
+      <button type="button" id="toggleKeyVis" aria-label="显示或隐藏密钥">👁</button>
+    </div>
+    <div class="sRow">
+      <button class="btn" id="cfgSave" type="button">保 存</button>
+      <button class="btn ghost" id="cfgTest" type="button">测 试</button>
+    </div>
+    <button class="btn ghost" id="cfgClose" type="button">关 闭</button>
+    <p class="sNote" id="cfgStatus"></p>
+  </div>
+</dialog>
+
+<!-- Inline Fill Dialog -->
+<dialog id="fillDlg" class="tarotModal">
+  <div class="modalCard">
+    <h3>✦ 原地补齐这项弹药</h3>
+    <p class="sNote" id="fillPrompt"></p>
+    <label for="fillInput">真实数字、量级或事实</label>
+    <input type="text" id="fillInput" placeholder="如：月均有效触达 80+ 候选人">
+    <div class="sRow">
+      <button class="btn" id="fillConfirm" type="button">升级简历</button>
+      <button class="btn ghost" id="fillCancel" type="button">取 消</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ 1. 基础工具与精致木刻鎏金卡背 SVG ============ */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const _urlP = new URLSearchParams(location.search);
+const SLOWMO = Math.max(1, Math.min(4, parseFloat(_urlP.get("slowmo")) || 1));
+const sleep = ms => new Promise(r => setTimeout(r, ms * SLOWMO));
+const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const CARD_BACK_SVG = `<svg viewBox="0 0 120 164" xmlns="http://www.w3.org/2000/svg">
+  <rect x="3" y="3" width="114" height="158" rx="6" fill="#15100b" stroke="#cfa968" stroke-width="1.3"/>
+  <rect x="8" y="8" width="104" height="148" rx="4" fill="none" stroke="rgba(207,169,104,.65)" stroke-width=".7" stroke-dasharray="2.5 2.5"/>
+  <rect x="13" y="13" width="94" height="138" rx="2.5" fill="none" stroke="rgba(207,169,104,.45)" stroke-width=".75"/>
+  <path d="M13 26L26 13M107 26L94 13M13 138L26 151M107 138L94 151" stroke="#cfa968" stroke-width=".9"/>
+  <circle cx="60" cy="82" r="35" fill="none" stroke="#cfa968" stroke-width=".9"/>
+  <circle cx="60" cy="82" r="28" fill="none" stroke="rgba(242,215,156,.45)" stroke-width=".7" stroke-dasharray="2 3"/>
+  <polygon points="60,41 67,75 101,82 67,89 60,123 53,89 19,82 53,75" fill="rgba(207,169,104,.16)" stroke="#f2d79c" stroke-width="1.1"/>
+  <polygon points="60,55 64,78 87,82 64,86 60,109 56,86 33,82 56,78" fill="none" stroke="#cfa968" stroke-width=".8"/>
+  <circle cx="60" cy="82" r="4.8" fill="#f2d79c"/>
+  <path d="M53 27A8.5 8.5 0 1 0 67 27A6 6 0 1 1 53 27Z" fill="#cfa968"/>
+  <path d="M53 137A8.5 8.5 0 1 1 67 137A6 6 0 1 0 53 137Z" fill="#cfa968"/>
+</svg>`;
+
+const CARDS = [
+  { src: "cards/card1.jpg", heading: "FIRST ARCANA", name: "I · 魔术师", sub: "职责版图 · 你手里握着什么武器" },
+  { src: "cards/card2.jpg", heading: "SECOND ARCANA", name: "XI · 正义", sub: "价值称重 · 让天平倒向真实价值" },
+  { src: "cards/card3.jpg", heading: "FINAL ARCANA", name: "ACE · 星币首牌 OFFER", sub: "王牌之战 · 敲开 Offer 之门" }
+];
+(function () {
+  const m = new URLSearchParams(location.search).get("cards");
+  if (m) {
+    const idx = m.split(",").map(n => parseInt(n, 10) - 1);
+    if (idx.length === 3 && idx.every(n => n >= 0 && n < 3 && new Set(idx).size === 3)) {
+      const srcs = CARDS.map(c => c.src);
+      idx.forEach((n, i) => { CARDS[i].src = srcs[n]; });
+    }
+  }
+})();
+
+/* ============ 2. 全屏 60fps 金色星尘粒子引擎（Canvas Physics） ============ */
+const StarEngine = (function () {
+  const canvas = $("#starCanvas");
+  const ctx = canvas.getContext("2d");
+  let W = 0, H = 0, dpr = 1;
+  const particles = [];
+  const ambient = [];
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // 环境漂浮微光尘埃
+  for (let i = 0; i < (reduced ? 0 : 28); i++) {
+    ambient.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 0.7 + Math.random() * 1.4,
+      vx: (Math.random() - 0.5) * 0.16,
+      vy: -0.08 - Math.random() * 0.22,
+      a: 0.15 + Math.random() * 0.45,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  function spawnSpark(x, y, vx, vy, r, life, color) {
+    if (reduced || particles.length > 520) return;
+    particles.push({ x, y, vx, vy, r, life, maxLife: life, color, spin: (Math.random() - 0.5) * 0.15, star: Math.random() < 0.32 });
+  }
+
+  // 核心炫技：一张卡牌在空中直接炸散成星尘流！
+  function dissolveRect(rect, count = 46, dirX = 0) {
+    if (reduced || !rect || !rect.width) return;
+    const palette = ["#fff6dc", "#f2d79c", "#cfa968", "#e8c47a"];
+    for (let i = 0; i < count; i++) {
+      const px = rect.left + Math.random() * rect.width;
+      const py = rect.top + Math.random() * rect.height;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.6 + Math.random() * 3.1;
+      const vx = Math.cos(angle) * speed + dirX * (0.8 + Math.random() * 1.6);
+      const vy = Math.sin(angle) * speed - (0.6 + Math.random() * 1.8);
+      spawnSpark(px, py, vx, vy, 1.1 + Math.random() * 2.5, 42 + Math.random() * 36, palette[i % palette.length]);
+    }
+  }
+
+  // 选中翻牌时的星环光爆
+  function burstPoint(x, y, count = 58) {
+    if (reduced) return;
+    const palette = ["#ffffff", "#fff3cc", "#f2d79c", "#cfa968"];
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.22;
+      const sp = 1.4 + Math.random() * 4.6;
+      spawnSpark(x, y, Math.cos(a) * sp, Math.sin(a) * sp, 1.2 + Math.random() * 2.7, 36 + Math.random() * 32, palette[i % palette.length]);
+    }
+  }
+
+  // 划过扇面时的微光拖尾
+  function trail(x, y) {
+    if (reduced) return;
+    for (let i = 0; i < 3; i++) {
+      spawnSpark(x + (Math.random() - 0.5) * 14, y + (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 0.9, -0.5 - Math.random() * 1.1, 0.9 + Math.random() * 1.6, 22 + Math.random() * 18, "#f2d79c");
+    }
+  }
+
+  function drawFourPointStar(x, y, r) {
+    ctx.beginPath();
+    ctx.moveTo(x, y - r * 2.2);
+    ctx.quadraticCurveTo(x, y, x + r * 2.2, y);
+    ctx.quadraticCurveTo(x, y, x, y + r * 2.2);
+    ctx.quadraticCurveTo(x, y, x - r * 2.2, y);
+    ctx.quadraticCurveTo(x, y, x, y - r * 2.2);
+    ctx.fill();
+  }
+
+  let lastT = 0;
+  function tick(t) {
+    const rawDt = lastT ? Math.min(0.06, (t - lastT) / 1000) : 0.0167;
+    lastT = t;
+    const step = (rawDt * 60) / SLOWMO;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+
+    // 环境微尘
+    for (let i = 0; i < ambient.length; i++) {
+      const p = ambient[i];
+      p.x += p.vx * step; p.y += p.vy * step;
+      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+      const alpha = p.a * (0.55 + 0.45 * Math.sin((t / SLOWMO) * 0.002 + p.phase));
+      ctx.fillStyle = `rgba(242,215,156,${alpha.toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 爆发与卡牌消散星尘
+    const drag = Math.pow(0.968, step);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life -= step;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      p.vx *= drag;
+      p.vy = p.vy * drag - 0.028 * step;
+      p.vx += Math.sin(p.life * 0.14 + p.spin * 10) * 0.035 * step;
+      p.x += p.vx * step;
+      p.y += p.vy * step;
+      const ratio = p.life / p.maxLife;
+      const twinkle = 0.65 + 0.35 * Math.sin(p.life * 0.55);
+      ctx.globalAlpha = Math.max(0, ratio * twinkle);
+      ctx.fillStyle = p.color;
+      if (p.star && p.r > 1.5) drawFourPointStar(p.x, p.y, p.r * ratio);
+      else {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(0.4, p.r * (0.4 + 0.6 * ratio)), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  return { dissolveRect, burstPoint, trail };
+})();
+
+/* ============ 3. 花式洗牌 + 散成星尘 + 用户亲手选牌 演出引擎 ============ */
+let flourishRunId = 0;
+let isFlourishing = false;
+
+function createDeckCardEl(index) {
+  const el = document.createElement("div");
+  el.className = "dCard";
+  el.dataset.idx = index;
+  el.innerHTML = `<div class="dCardInner"><div class="dFace dFront"><img alt=""><div class="sheen"></div></div><div class="dFace dBack">${CARD_BACK_SVG}</div></div>`;
+  return el;
+}
+
+// 计算弧形扇面每张牌的位置
+function fanGeometry(i, total, spreadW, arcDrop, maxAngle) {
+  const t = total === 1 ? 0 : (i / (total - 1)) * 2 - 1; // -1 .. +1
+  const x = t * spreadW;
+  const y = t * t * arcDrop;
+  const rot = t * maxAngle;
+  return { x, y, rot };
+}
+
+// 核心牌桌控制：在一块区域内执行「18张花式洗切 → 11张凌空散成星尘 → 7张扇面待你亲手点选 → 选中者居中3D翻牌，其余尽化星尘！」
+function runFlourishAndPick({ container, cardMeta, totalDeck = 18, fanCount = 7, whisperEl, captionEl, onPicked, fast = false }) {
+  const myRun = ++flourishRunId;
+  isFlourishing = true;
+  activeFanControl = null;
+  return new Promise(async resolve => {
+    const alive = () => myRun === flourishRunId;
+    container.innerHTML = container.id === "tableArena" ? '<div id="magicCircle"></div>' : "";
+    container.classList.add("flourishing");
+    if (captionEl) captionEl.classList.remove("show");
+    if (whisperEl) whisperEl.textContent = "花式洗牌中…";
+
+    const isNarrow = window.innerWidth < 430;
+    const spreadW = isNarrow ? 126 : 162;
+    const arcDrop = isNarrow ? 30 : 38;
+    const maxAngle = isNarrow ? 25 : 29;
+
+    const cards = [];
+    for (let i = 0; i < totalDeck; i++) {
+      const c = createDeckCardEl(i);
+      c.style.zIndex = i + 1;
+      c.style.transform = `translate(${(i - totalDeck / 2) * 0.7}px, ${(totalDeck - i) * 0.65}px) rotate(${(i % 2 ? 0.6 : -0.6)}deg)`;
+      container.appendChild(c);
+      cards.push(c);
+    }
+
+    if (!reducedMotion) {
+      await sleep(fast ? 80 : 140);
+      if (!alive()) return resolve(null);
+
+      // 拍1：牌手花式分切（左叠 + 右叠拉开弧度，像双手推牌）
+      const half = Math.floor(totalDeck / 2);
+      cards.forEach((c, i) => {
+        const isLeft = i < half;
+        const k = isLeft ? i : (i - half);
+        const side = isLeft ? -1 : 1;
+        c.style.transition = `transform ${fast ? 340 : 460}ms cubic-bezier(.22,.88,.26,1)`;
+        c.style.transform = `translate(${side * (isNarrow ? 94 : 122) + k * side * 1.4}px, ${-14 - k * 1.6}px) rotate(${side * (16 + k * 0.7)}deg)`;
+      });
+      await sleep(fast ? 360 : 500);
+      if (!alive()) return resolve(null);
+
+      // 拍2：凌空瀑布交错洗牌（Bridge Riffle Cascade）— 左右逐张穿插拱起！
+      if (whisperEl) whisperEl.textContent = "星尘切牌…";
+      for (let step = 0; step < half; step++) {
+        if (!alive()) return resolve(null);
+        const leftC = cards[half - 1 - step];
+        const rightC = cards[totalDeck - 1 - step];
+        const archY = -44 + Math.abs(step - half / 2) * 6;
+        if (leftC) {
+          leftC.style.zIndex = 20 + step * 2;
+          leftC.style.transition = "transform 280ms cubic-bezier(.25,.9,.3,1)";
+          leftC.style.transform = `translate(${-16 + step * 1.5}px, ${archY}px) rotate(${-5 + step}deg) scale(1.03)`;
+        }
+        if (rightC) {
+          rightC.style.zIndex = 21 + step * 2;
+          rightC.style.transition = "transform 280ms cubic-bezier(.25,.9,.3,1)";
+          rightC.style.transform = `translate(${16 - step * 1.5}px, ${archY + 4}px) rotate(${5 - step}deg) scale(1.03)`;
+        }
+        await sleep(fast ? 26 : 38);
+      }
+      await sleep(fast ? 220 : 320);
+      if (!alive()) return resolve(null);
+
+      // 拍3：旋涡甩牌 — 多余的牌飞向外圈并在空中直接炸散成璀璨星尘！
+      const keepStart = Math.floor((totalDeck - fanCount) / 2);
+      const shedCards = [];
+      const keptCards = [];
+      cards.forEach((c, i) => {
+        if (i >= keepStart && i < keepStart + fanCount) keptCards.push(c);
+        else shedCards.push(c);
+      });
+
+      shedCards.forEach((c, idx) => {
+        const ang = (idx / shedCards.length) * Math.PI * 2;
+        const dist = isNarrow ? 130 : 172;
+        c.style.transition = "transform 340ms cubic-bezier(.22,.85,.32,1), opacity 240ms ease";
+        c.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * (dist * 0.72)}px) rotate(${(ang * 180 / Math.PI) + 35}deg) scale(0.76)`;
+      });
+      keptCards.forEach((c, i) => {
+        c.style.zIndex = 40 + i;
+        c.style.transition = "transform 340ms cubic-bezier(.22,.85,.32,1)";
+        c.style.transform = `translate(0px, 6px) rotate(${(i - (fanCount - 1) / 2) * 3}deg) scale(1.02)`;
+      });
+      await sleep(fast ? 210 : 290);
+      if (!alive()) return resolve(null);
+
+      // 真正把飞出的 11 张牌瞬间化作漫天金色星尘！
+      shedCards.forEach((c, idx) => {
+        const rect = c.getBoundingClientRect();
+        const dirX = idx % 2 === 0 ? -1 : 1;
+        StarEngine.dissolveRect(rect, fast ? 20 : 30, dirX);
+        c.classList.add("dissolving");
+      });
+      await sleep(fast ? 180 : 260);
+      if (!alive()) return resolve(null);
+      shedCards.forEach(c => c.remove());
+
+      // 拍4：余下的 7 张暗牌丝滑展开成可触摸弧形扇面！
+      container.classList.remove("flourishing");
+      isFlourishing = false;
+      keptCards.forEach((c, i) => {
+        const g = fanGeometry(i, fanCount, spreadW, arcDrop, maxAngle);
+        c.classList.add("pickable");
+        c.dataset.fanIdx = i;
+        c.style.zIndex = 10 + i;
+        c.style.transition = "transform 520ms cubic-bezier(.18,.9,.24,1)";
+        c.style.transform = `translate(${g.x}px, ${g.y}px) rotate(${g.rot}deg)`;
+      });
+      if (whisperEl) whisperEl.textContent = "✦ 凭直觉，选一张牌 ✦";
+
+      wirePickableFan(keptCards, { container, cardMeta, spreadW, arcDrop, maxAngle, whisperEl, captionEl, onPicked, resolve });
+    } else {
+      container.classList.remove("flourishing");
+      isFlourishing = false;
+      const keptCards = cards.slice(0, fanCount);
+      cards.slice(fanCount).forEach(c => c.remove());
+      keptCards.forEach((c, i) => {
+        const g = fanGeometry(i, fanCount, spreadW, arcDrop, maxAngle);
+        c.classList.add("pickable");
+        c.dataset.fanIdx = i;
+        c.style.zIndex = 10 + i;
+        c.style.transform = `translate(${g.x}px, ${g.y}px) rotate(${g.rot}deg)`;
+      });
+      if (whisperEl) whisperEl.textContent = "✦ 凭直觉，选一张牌 ✦";
+      wirePickableFan(keptCards, { container, cardMeta, spreadW, arcDrop, maxAngle, whisperEl, captionEl, onPicked, resolve });
+    }
+  });
+}
+
+let activeFanControl = null;
+function wirePickableFan(keptCards, ctx) {
+  const { container, cardMeta, spreadW, arcDrop, maxAngle, whisperEl, captionEl, onPicked, resolve } = ctx;
+  const fanCount = keptCards.length;
+  let picked = false;
+  let hoveredIdx = -1;
+
+  function applyHover(idx) {
+    if (picked) return;
+    hoveredIdx = idx;
+    keptCards.forEach((c, i) => {
+      const g = fanGeometry(i, fanCount, spreadW, arcDrop, maxAngle);
+      c.style.transition = "transform 240ms cubic-bezier(.22,.9,.3,1)";
+      if (i === idx) {
+        c.classList.add("hovered");
+        c.style.zIndex = 50;
+        // 磁吸浮起 + 微微拉正
+        c.style.transform = `translate(${g.x}px, ${g.y - 34}px) rotate(${g.rot * 0.45}deg) scale(1.13)`;
+      } else {
+        c.classList.remove("hovered");
+        c.style.zIndex = 10 + i;
+        const push = idx >= 0 ? (i < idx ? -10 : 10) : 0;
+        c.style.transform = `translate(${g.x + push}px, ${g.y}px) rotate(${g.rot}deg)`;
+      }
+    });
+  }
+
+  async function pickCard(chosenEl, fastReveal = false) {
+    if (picked) return;
+    picked = true;
+    activeFanControl = null;
+    if (whisperEl) whisperEl.textContent = "";
+
+    // 把注定的牌面注入用户亲手点中的那张牌！
+    chosenEl.querySelector(".dFront img").src = cardMeta.src;
+
+    // 未被选中的其余 6 张牌，凌空炸散成璀璨星尘！
+    keptCards.forEach(c => {
+      c.classList.remove("pickable", "hovered");
+      if (c !== chosenEl) {
+        const rect = c.getBoundingClientRect();
+        const dir = rect.left < window.innerWidth / 2 ? -1 : 1;
+        StarEngine.dissolveRect(rect, fastReveal ? 24 : 38, dir);
+        c.classList.add("dissolving");
+      }
+    });
+
+    // 选中的牌滑向舞台中央并放大
+    chosenEl.style.zIndex = 60;
+    chosenEl.style.transition = "transform 520ms cubic-bezier(.2,.92,.28,1)";
+    chosenEl.style.transform = "translate(0px, -10px) rotate(0deg) scale(1.42)";
+    await sleep(fastReveal ? 280 : 420);
+
+    // 3D 翻牌揭示 + 中心星芒爆发！
+    chosenEl.classList.add("faceup");
+    const r = chosenEl.getBoundingClientRect();
+    StarEngine.burstPoint(r.left + r.width / 2, r.top + r.height / 2, fastReveal ? 42 : 68);
+
+    if (captionEl) {
+      $("#revCapTitle").textContent = cardMeta.name;
+      $("#revCapSub").textContent = cardMeta.sub;
+      captionEl.classList.add("show");
+    } else if (whisperEl) {
+      whisperEl.textContent = cardMeta.name + " · " + cardMeta.sub.split("·")[0].trim();
+    }
+
+    await sleep(fastReveal ? 920 : 1380);
+    if (onPicked) onPicked();
+    resolve(chosenEl);
+  }
+
+  keptCards.forEach((c, i) => {
+    c.addEventListener("pointerenter", e => {
+      applyHover(i);
+      StarEngine.trail(e.clientX, e.clientY);
+    });
+    c.addEventListener("pointermove", e => {
+      if (Math.random() < 0.28) StarEngine.trail(e.clientX, e.clientY);
+    });
+    c.addEventListener("click", () => { if (!demoRunning) pickCard(c, false); });
+  });
+  container.addEventListener("pointerleave", () => applyHover(-1));
+
+  // 暴露给一键演示模式，让演示光点亲自“滑过扇面并选中一张牌”！
+  activeFanControl = { keptCards, applyHover, pickCard };
+}
+
+/* ============ 4. 六大岗位深度传导库（与 Skill v2.1 严格对齐） ============ */
+const ROLE_PROFILES = {
+  recruiting: {
+    name: "招聘 / 人才智能",
+    dims: ["垂直人才库 800+", "目标群体覆盖率 60%+（带口径）", "独立交付 20+ 核心岗", "招聘周期从 65 天压至 38 天", "节省猎头预算 40万+"],
+    estimateFormula: "每月新增建档/推进人数 × 任职月数；或用自建渠道入职数 × 单人平均猎头费估算降本。",
+    verbs: "定向攻克、搭建、沉淀、动态追踪、漏斗诊断、重塑流程、降本交付",
+    defenses: [
+      { q: "覆盖率或转化率的分母口径是怎么定的？", prepare: "明确统计分母（目标行业/部门预估总人数）及时间窗口。" },
+      { q: "人才池与入职交付中，公司老库与个人独立开拓各占多少？", prepare: "分清团队既有资源与个人从 0 推进落地的真实份额。" }
+    ]
+  },
+  engineering: {
+    name: "研发 / 算法 / 数据",
+    dims: ["P99 从 800ms 降至 120ms", "可用性 99.95% / P1 清零", "日均 300万+ 调用", "发布耗时缩短 50%", "月省算力成本数万元"],
+    estimateFormula: "看监控大盘日均 QPS、慢查询优化前后均值、大促前后的告警次数或下线机器核数。",
+    verbs: "架构设计、主导重构、定位根因、性能优化、灰度迁移、降本治理",
+    defenses: [
+      { q: "优化前后的基线和线上真实流量是多少？（别拿压测当线上）", prepare: "区分单机压测 QPS 与线上真实峰值，备好优化前后监控基线。" },
+      { q: "当时为什么拍板选这个方案，放弃了其他技术路线？", prepare: "准备 1–2 个备选方案的 Trade-off 及灰度回滚预案。" }
+    ]
+  },
+  product: {
+    name: "产品 / AI 产品",
+    dims: ["首日激活转化 +12pp", "覆盖 10万+ 活跃用户", "月度营收增长 15%", "内部人效提升 40%", "AI 一键采纳率 65%"],
+    estimateFormula: "看 A/B 实验差值、核心漏斗那一跳变化，或「使用人数 × 每人每周省时」。",
+    verbs: "洞察重构、主导孵化、拆解漏斗、定义策略、实验验证、商业化闭环",
+    defenses: [
+      { q: "数据上涨怎么归因？怎么证明是产品改版而非同期投流带来的？", prepare: "准备 A/B 实验分组、前后周期对比或漏斗拆解。" },
+      { q: "当时砍掉了哪些看起来很美、但 ROI 不高的需求？", prepare: "讲清需求真伪判断与第一版上线后的复盘迭代。" }
+    ]
+  },
+  operations: {
+    name: "运营 / 增长 / 市场",
+    dims: ["运营 12 个群 / 4000+ 用户", "周活跃率从 5% 升至 24%", "单篇峰值 10万+ 爆款", "投放 ROI 达 3.2", "拉新 2000+ / 线索 300+"],
+    estimateFormula: "用「单篇/单场均值 × 周期次数」算总量并单标 Top 爆款，或社群数 × 总人数。",
+    verbs: "盘活、重构漏斗、操盘、孵化爆款、分层运营、撬动自然流量",
+    defenses: [
+      { q: "曝光和拉新很亮眼，后端转化、留存和投放 ROI 怎么样？", prepare: "备好投入预算、单客成本与后端成交/留存衔接数据。" },
+      { q: "这个爆款能复刻吗？还是刚好撞上热点？", prepare: "提炼可复用选题/裂变框架，举出二次验证案例。" }
+    ]
+  },
+  sales: {
+    name: "销售 / 商务 / BD",
+    dims: ["年签约 150万+（全额回款）", "超额完成 Quota 135%", "攻克 3 家行业标杆 KA", "成单周期缩 30%", "续费率 92% + 转介绍"],
+    estimateFormula: "用「平均客单价 × 成交单数」核对总盘，签约额与实际回款分开标注。",
+    verbs: "从0破冰、竞品撬单、主导谈判、挽回流失、深耕增购、搭建渠道",
+    defenses: [
+      { q: "业绩是签约额还是实际回款？自主开拓占多大比例？", prepare: "明确回款口径，切分公司分派线索 vs 个人自主开拓份额。" },
+      { q: "拿下标杆大单时，最关键的谈判拐点你怎么推过去的？", prepare: "复盘决策链突破、隐性成本测算或 POC 试点的个人动作。" }
+    ]
+  },
+  general: {
+    name: "通用 / 职能 / 实习",
+    dims: ["月均处理 200+ 单", "单次耗时从 3 小时压至 30 分钟", "跨 4 部门服务 300+ 同事", "连续 6 个月零延期", "比价省费 5万+"],
+    estimateFormula: "按「每周/每月做几次 × 单次规模 × 任职月数」诚实推算量级。",
+    verbs: "统筹、梳理重构、推动落地、排查堵漏、沉淀SOP、精准保障",
+    defenses: [
+      { q: "这件事换一个普通同事按流程做，跟你做出来的差别在哪？", prepare: "讲清你『多走半步』提前堵住的隐患或沉淀的复用模板。" },
+      { q: "个人具体承接哪一段？有没有把团队功劳算到自己头上？", prepare: "诚实划清边界，守住自己落地模块并讲透细节。" }
+    ]
+  }
+};
+const ROLE_ORDER = ["recruiting", "engineering", "product", "operations", "sales", "general"];
+const ITEM_KEYS = ["content", "baseline", "action", "tools", "results", "value"];
+const LABEL = { content: "内容", baseline: "反差", action: "动作", tools: "工具", results: "量化", value: "传导" };
+
+/* ============ 5. 状态机与持久化 ============ */
+const LS = "tlr_tarot_v4";
+function freshState() {
+  return {
+    basic: { company: "", title: "", start: "", end: "", targetRole: "" },
+    roleFamily: "general",
+    workItems: [],
+    metricsLibrary: [],
+    projects: [],
+    curProj: null,
+    positioning: "",
+    output: null,
+    screen: "landing",
+    cardIdx: 0,
+    unlockedCard: -1,
+    step: "idle",
+    curItemIdx: 0,
+    coreQueue: [],
+    routineIndices: [],
+    messages: []
+  };
+}
+let S = loadState() || freshState();
+function saveState() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+function loadState() { try { return JSON.parse(localStorage.getItem(LS)); } catch (e) { return null; } }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function toast(m) {
+  const t = $("#toast"); t.textContent = m; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* ============ 6. BYOK 大模型引擎 ============ */
+const LLM_KEY = "tlr_llm_cfg_v2";
+let llmCfg = null;
+try { llmCfg = JSON.parse(localStorage.getItem(LLM_KEY) || "null"); } catch (e) {}
+function llmReady() { return !!(llmCfg && llmCfg.key && llmCfg.base && llmCfg.model); }
+function updateEngineNote() {
+  const ready = llmReady();
+  const n = $("#engineNote");
+  if (n) n.textContent = ready ? `大模型实时传导（${llmCfg.model}）` : "本地引擎 · 点左上 ⚙ 接入大模型";
+  $("#settingsBtn").classList.toggle("connected", ready);
+}
+async function callLLM(messages, maxTokens) {
+  const r = await fetch(llmCfg.base.replace(/\/+$/, "") + "/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + llmCfg.key },
+    body: JSON.stringify({ model: llmCfg.model, messages, temperature: 0.55, max_tokens: maxTokens || 1200 })
+  });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  const c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+  if (!c) throw new Error("空响应");
+  return c;
+}
+function parseJSON(t) {
+  t = String(t).replace(/```json|```/gi, "").trim();
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("非 JSON");
+  return JSON.parse(t.slice(a, b + 1));
+}
+function getRP() { return ROLE_PROFILES[S.roleFamily] || ROLE_PROFILES.general; }
+function buildSysPrompt() {
+  const rp = getRP();
+  return `你是「三问成历」塔罗简历教练。方法论：沿着『反差基线→方案权衡与动作→量化交付→下游传导』一次只问 1 个极简犀利的问题（每次回复不超过 2 句话，省用户注意力）。岗位族：${rp.name}；强动词：${rp.verbs}。铁律：绝不编造数字或事实，缺数标【待补充：项】；只输出严格 JSON。`;
+}
+
+/* ============ 7. 屏幕与顶部 3 牌托盘同步 ============ */
+const TRAY_HIDDEN_LABELS = ["I", "II", "III"];
+const TRAY_REVEALED_LABELS = ["魔术师", "正义", "OFFER"];
+for (let i = 0; i < 3; i++) $("#trImg" + i).src = CARDS[i].src;
+
+const URL_PARAMS = new URLSearchParams(location.search);
+const AUTO_DEMO = URL_PARAMS.get("demo") === "1";
+const RECORD_MODE = URL_PARAMS.get("record") === "1";
+
+function syncUI() {
+  const isLand = S.screen === "landing";
+  $("#topbar").classList.toggle("landing-bar", isLand);
+  $("#tray").classList.toggle("show", !isLand);
+  $("#settingsBtn").classList.toggle("hide", RECORD_MODE);
+  $("#demoBtn").classList.toggle("hide", !isLand || demoRunning || RECORD_MODE);
+  $("#skipDemoBtn").classList.toggle("hide", !demoRunning || RECORD_MODE);
+  $("#restart").classList.toggle("hide", isLand || demoRunning || RECORD_MODE);
+
+  $$(".screen").forEach(sc => sc.classList.remove("active"));
+  $("#" + S.screen).classList.add("active");
+
+  $$("#tray .traySlot").forEach((slot, i) => {
+    const unlocked = i <= S.unlockedCard;
+    const active = S.screen === "reading" && S.cardIdx === i;
+    const done = S.screen === "result" || i < S.cardIdx;
+    slot.classList.toggle("unlocked", unlocked);
+    slot.classList.toggle("revealed", unlocked);
+    slot.classList.toggle("active", active);
+    slot.classList.toggle("done", done && !active);
+    const nameEl = $("#trName" + i);
+    if (nameEl) nameEl.textContent = unlocked ? TRAY_REVEALED_LABELS[i] : TRAY_HIDDEN_LABELS[i];
+  });
+  updateScaleWidget();
+}
+
+$$("#tray .traySlot").forEach((slot, i) => {
+  slot.addEventListener("click", () => {
+    if (i > S.unlockedCard || demoRunning) return;
+    if (S.screen === "result") { S.screen = "reading"; syncUI(); scrollChatBottom(); }
+  });
+});
+
+function scoreItem(it) {
+  if (!it || !it.completeness) return 0;
+  const c = it.completeness;
+  return (c.content ? 10 : 0) + (c.tools ? 12 : 0) + (c.action ? 16 : 0) + (c.baseline ? 18 : 0) + (c.value ? 20 : 0) + (c.results ? 24 : 0);
+}
+function updateScaleWidget() {
+  const showScale = S.screen === "reading" && S.cardIdx === 1 && S.workItems.length > 0;
+  $("#scaleWidget").classList.toggle("show", showScale);
+  if (!showScale) return;
+  const it = S.workItems[Math.min(S.curItemIdx, S.workItems.length - 1)];
+  if (!it) return;
+  const score = scoreItem(it);
+  const deg = score >= 78 ? 0 : Math.round(-18 + (score / 78) * 18);
+  $("#scaleBeamGrp").style.transform = `rotate(${deg}deg)`;
+  $("#scaleName").textContent = it.name;
+  $("#scaleState").textContent = score >= 78 ? "✦ 天平已稳" : (score >= 46 ? "天平渐平" : "左盘过重");
+  $("#scaleState").style.color = score >= 78 ? "#a6d288" : "#f2d79c";
+  $("#scaleDots").innerHTML = ITEM_KEYS.map(k => `<span class="chip${it.completeness[k] ? ' on' : ''}">${LABEL[k]}</span>`).join("");
+}
+
+/* ============ 8. 对话流与极简提示渲染（Attention Is All You Need） ============ */
+function scrollChatBottom() {
+  const el = $("#chatStream");
+  requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+}
+function appendMessage(m, persist = true) {
+  if (persist) { S.messages.push(m); saveState(); }
+  renderMsg(m);
+  scrollChatBottom();
+}
+function renderMsg(m) {
+  const stream = $("#chatStream");
+  if (m.type === "bot") {
+    const div = document.createElement("div");
+    div.className = "msg bot";
+    div.innerHTML = (m.tag ? `<div class="botTag">✦ ${esc(m.tag)}</div>` : "") + m.html;
+    stream.appendChild(div);
+  } else if (m.type === "user") {
+    const div = document.createElement("div");
+    div.className = "msg user";
+    div.textContent = m.text;
+    stream.appendChild(div);
+  } else if (m.type === "scopeCard") {
+    const div = document.createElement("div");
+    div.className = "msg cardMsg";
+    div.dataset.scopeCard = "1";
+    div.innerHTML = buildScopeCardHTML();
+    stream.appendChild(div);
+  }
+}
+function rerenderAllMessages() {
+  $("#chatStream").innerHTML = "";
+  S.messages.forEach(renderMsg);
+  scrollChatBottom();
+}
+function buildScopeCardHTML() {
+  const rp = getRP();
+  const rows = S.workItems.map((it, i) => `
+    <div class="scopeRow${it.priority === 'core' ? ' core' : ''}">
+      <div style="min-width:0;flex:1">
+        <b>${esc(it.name)}</b>
+        <span>${esc(it.content)}</span>
+      </div>
+      <button type="button" class="prioPill${it.priority === 'core' ? ' core' : ''}" data-prio="${i}">${it.priority === 'core' ? '★ 主角' : '常规'}</button>
+    </div>
+  `).join("");
+  const roles = ROLE_ORDER.map(k => `<button type="button" class="chip btnChip${k === S.roleFamily ? ' active' : ''}" data-role="${k}">${esc(ROLE_PROFILES[k].name)}</button>`).join("");
+  return `<div class="cardMsgHead"><h4>✦ 魔术师版图</h4><span class="chip on">${esc(rp.name)}</span></div>
+    <div style="font-family:var(--sans);font-size:12.8px;color:#dfd1b3;line-height:1.65">${esc(S.positioning)}</div>
+    <div class="scopeList">${rows}</div>
+    <div class="roleBar">${roles}</div>`;
+}
+$("#chatStream").addEventListener("click", e => {
+  const p = e.target.closest("[data-prio]");
+  if (p) {
+    const i = +p.dataset.prio;
+    S.workItems[i].priority = S.workItems[i].priority === "core" ? "routine" : "core";
+    saveState();
+    $$('[data-scope-card="1"]').forEach(c => { c.innerHTML = buildScopeCardHTML(); });
+    return;
+  }
+  const r = e.target.closest("[data-role]");
+  if (r) {
+    S.roleFamily = r.dataset.role;
+    saveState();
+    $$('[data-scope-card="1"]').forEach(c => { c.innerHTML = buildScopeCardHTML(); });
+    toast("已切至「" + getRP().name + "」");
+  }
+});
+
+let typingEl = null;
+function showTyping() {
+  removeTyping();
+  typingEl = document.createElement("div");
+  typingEl.className = "msg bot";
+  typingEl.innerHTML = '<div class="typingDots"><i></i><i></i><i></i></div>';
+  $("#chatStream").appendChild(typingEl);
+  scrollChatBottom();
+}
+function removeTyping() { if (typingEl) { typingEl.remove(); typingEl = null; } }
+
+function setQuickChips(list) {
+  const box = $("#quickChips");
+  box.innerHTML = "";
+  (list || []).forEach(item => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "qPill" + (item.kind ? " " + item.kind : "");
+    btn.textContent = item.label;
+    btn.addEventListener("click", () => {
+      if (item.onClick) item.onClick();
+      else if (item.fill) {
+        const inp = $("#chatInput");
+        inp.value = inp.value ? (inp.value + "；" + item.fill) : item.fill;
+        autoResizeInput(); inp.focus();
+      } else if (item.send) submitUserText(item.send);
+    });
+    box.appendChild(btn);
+  });
+}
+function autoResizeInput() {
+  const inp = $("#chatInput");
+  inp.style.height = "auto";
+  inp.style.height = Math.min(120, Math.max(42, inp.scrollHeight)) + "px";
+}
+$("#chatInput").addEventListener("input", autoResizeInput);
+$("#chatInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitUserText(); } });
+$("#sendBtn").addEventListener("click", () => submitUserText());
+
+/* ============ 9. 自然语言抽取引擎 ============ */
+function matchRoleText(s) {
+  if (/招聘|人才|sourcing|HR|hr|猎头|雇主|HRBP/.test(s)) return "recruiting";
+  if (/运营|增长|市场|品牌|新媒体|公众号|社群|活动|投放|ROI|小红书|电商|内容|生态/.test(s)) return "operations";
+  if (/产品经理|产品|PRD|商业化|策略产品|AI\s*产品/.test(s)) return "product";
+  if (/销售|客户经理|KA|BD|商务|售前|回款|签约|渠道销售/.test(s)) return "sales";
+  if (/研发|后端|前端|算法|工程师|测试|运维|架构|全栈|开发|数仓|SRE/.test(s)) return "engineering";
+  return null;
+}
+function guessRole(title, body = "") {
+  return matchRoleText(title || "") || matchRoleText(body || "") || "general";
+}
+function hasNum(s) {
+  return /(\d+(\.\d+)?\s*[%％万亿千百十+倍wWkK]|几十|几百|上千|上万|翻倍|Top|前三|第一|排名|清零|多份|工作台|系统|SOP|手册)/i.test(s || "");
+}
+function parseBasicFromSentence(text) {
+  const raw = text.trim();
+  let start = "", end = "";
+  const dr = raw.match(/(\d{4})[.\-\/年\s]*(\d{1,2})\s*(?:月)?\s*(?:到|至|-|–|~|—)+\s*(至今|现在|目前|\d{4}[.\-\/年\s]*\d{1,2})/);
+  if (dr) {
+    start = dr[1] + "." + dr[2].padStart(2, "0");
+    if (/至今|现在|目前/.test(dr[3])) end = "至今";
+    else { const em = dr[3].match(/(\d{4})[.\-\/年\s]*(\d{1,2})/); if (em) end = em[1] + "." + em[2].padStart(2, "0"); }
+  } else {
+    const single = raw.match(/(\d{4})[.\-\/年\s]*(\d{1,2})/);
+    if (single) start = single[1] + "." + single[2].padStart(2, "0");
+    if (/至今|现在|还在职|目前/.test(raw)) end = "至今";
+  }
+  let targetRole = "";
+  const tm = raw.match(/(?:想投|想看|目标|打算看|准备投)[：:是为]?\s*([^，,。；;\n]+)/);
+  if (tm) targetRole = tm[1].trim();
+  const stripped = raw
+    .replace(/(?:想投|想看|目标|打算看|准备投)[^，,。；;\n]*/g, "")
+    .replace(/\d{4}[.\-\/年\s]*(\d{1,2})\s*(?:月)?\s*(?:(?:到|至|-|–|~|—)+\s*(?:至今|现在|目前|\d{4}[.\-\/年\s]*\d{1,2}\s*(?:月)?))?/g, "")
+    .replace(/从|在|做|担任|岗位是|公司是/g, " ");
+  const segs = stripped.split(/[，,、；;。\n|｜]+/).map(s => s.trim()).filter(Boolean);
+  let company = segs[0] || "", title = segs[1] || "";
+  if (!title && company.includes(" ")) { const p = company.split(/\s+/); company = p[0]; title = p.slice(1).join(" "); }
+  return { company: company || "某公司", title: title || "核心岗位", start, end, targetRole };
+}
+function parseScopeFromText(text) {
+  let coreHint = "";
+  const hm = text.match(/(?:最耗心血|最拿得出手|最核心|最看重|重点是|主角是)[^。；;\n]*/);
+  if (hm) coreHint = hm[0];
+  const body = hm ? text.replace(hm[0], "") : text;
+  let chunks = body.split(/[\n；;]+/).map(s => s.trim()).filter(Boolean);
+  if (chunks.length === 1) {
+    chunks = body.split(/(?:\d+[.、）)]\s*|[，,、]+(?=[^，,、]{2,20}(?:：|:|追踪|洞察|系统|看板|开发|运营|维护|销售|开拓|搭建|负责|设计|优化|增长|活动|冷启动|闭环)))/).map(s => s.trim()).filter(Boolean);
+  }
+  if (chunks.length === 1 && /、/.test(chunks[0])) {
+    chunks = chunks[0].replace(/^[^：:]*?(?:负责|主要|大概|几摊)[：:是]?\s*/, "").split(/[、，,]+/).map(s => s.trim()).filter(Boolean);
+  }
+  chunks = chunks.filter(c => c.length >= 2).slice(0, 6);
+  const role = guessRole(S.basic.title, text);
+  const items = chunks.map((raw, i) => {
+    const starred = /^[★*⭐]/.test(raw);
+    const clean = raw.replace(/^[★*⭐\-\d.、）)\s]+/, "").trim();
+    const parts = clean.split(/[：:]/);
+    const name = (parts[0] || clean).slice(0, 22).trim();
+    const content = (parts.slice(1).join("：") || clean).trim();
+    const mentioned = coreHint && (coreHint.includes(name.slice(0, 3)) || (name.length >= 4 && coreHint.includes(name.slice(-3))));
+    const toolsMatch = clean.match(/(A\/B|Prompt|SQL|BI|看板|自动化|脚本|CRM|LLM|RAG|KOC|SOP|小红书|Discord|系统|平台|模板)/gi);
+    const tools = toolsMatch ? [...new Set(toolsMatch)].join(" / ") : "";
+    const action = /独立|主导|操盘|自己|自建|从0到1|从 0 到 1/.test(clean) ? "独立主导落地" : (/协同|配合/.test(clean) ? "协同推进" : "");
+    return {
+      id: "w" + (i + 1), name, priority: (starred || mentioned) ? "core" : "routine",
+      content, baseline: "", action, serve: "", tools, results: "", value: "",
+      completeness: { content: !!content, baseline: false, action: !!action, tools: !!tools, results: false, value: false }
+    };
+  });
+  if (!items.some(x => x.priority === "core")) items.slice(0, Math.min(2, items.length)).forEach(x => { x.priority = "core"; });
+  const isAiOps = role === "operations" && /AI|Prompt|模型|模板|A\/B|出片/i.test(S.basic.title + " " + text);
+  const positioning = isAiOps
+    ? "稀缺的「AI 产品 × 增长运营」复合杠杆位：能把高门槛模型能力翻译成低摩擦增长与商业化闭环。"
+    : `已识别 ${items.length} 摊职责，优先深挖 ★ 主角盘。`;
+  return { roleFamily: role, workItems: items, positioning };
+}
+function extractMetricsFromText(text, sourceId) {
+  const res = []; if (!text) return res;
+  const cleaned = text.replace(/【待补充：[^】]*】/g, "");
+  const clauses = cleaned.split(/[，,、；;。！？\n（）()]+/).map(s => s.trim()).filter(Boolean);
+  const seen = new Set();
+  clauses.forEach(cl => {
+    if (!/\d/.test(cl)) return;
+    let phrase = cl
+      .replace(/^(?:上线后|并|且|同时|累计|直接带动|带动|主导|独立操盘|独立|操盘|征集|撬动|签约|沉淀|摸排|覆盖|实现|交付|完成|目标公司|达到|达|平均|约|共|合计|输出)\s*/g, "")
+      .replace(/^(?:沉淀|操盘|征集|撬动|签约|主导)\s*/g, "")
+      .replace(/与一键同款流$/g, "")
+      .replace(/从\s*(\d[\d.]*%?)\s*(?:提升至|跃升至|升至|降至|压至|缩至)\s*(\d[\d.]*%?)/, "$1→$2")
+      .trim();
+    if (phrase.length > 26) {
+      const m = phrase.match(/([A-Za-z\u4e00-\u9fa5\s]{0,12}\d[\d,.]*(?:\s*(?:[-–~→])\s*\d[\d,.]*)?\s*(?:[%％万亿千百+倍wWkK]|pp|ms|小时|天|周|个月|人|家|份|个|条|次|年|元|件|期|\+)+(?:\s*[A-Za-z\u4e00-\u9fa5]{1,8})?)/);
+      if (m) phrase = m[1].trim();
+    }
+    if (phrase && phrase.length <= 28 && !seen.has(phrase)) { seen.add(phrase); res.push({ dim: "量化", value: phrase, source: sourceId }); }
+  });
+  return res;
+}
+function syncMetricsLibrary() {
+  const list = [], seen = new Set();
+  const add = (dim, val, src) => { const v = String(val || "").trim(); if (!v || seen.has(v)) return; seen.add(v); list.push({ dim, value: v, source: src }); };
+  S.workItems.forEach(it => extractMetricsFromText(it.results, it.id).forEach(m => add("量化", m.value, it.id)));
+  S.projects.forEach(p => extractMetricsFromText(p.R, p.id).forEach(m => add("项目战果", m.value, p.id)));
+  S.metricsLibrary = list;
+}
+function fillProjFromRaw(p, text) {
+  const colonIdx = text.search(/[：:]/);
+  let body = text.trim();
+  if (colonIdx > 0 && colonIdx <= 26) {
+    p.name = text.slice(0, colonIdx).replace(/^(?:就|选|聊|讲|这个|我想重点讲)/, "").trim();
+    body = text.slice(colonIdx + 1).trim();
+  } else {
+    const first = text.split(/[，,。；;\n]/)[0] || "代表性攻坚项目";
+    p.name = first.replace(/^(?:就|选|聊|讲|这个|我做过|做一个)/, "").slice(0, 22).trim() || "代表性攻坚项目";
+  }
+  const clauses = body.split(/[，,。；;\n]+/).map(s => s.trim()).filter(Boolean);
+  const resClauses = clauses.filter(c => /(?:摸排|覆盖|沉淀|交付|提升|降低|缩短|增长|达成|签约|上线了).*\d|\d+\+/.test(c));
+  const bgClauses = clauses.filter(c => !resClauses.includes(c));
+  p.S = bgClauses.join("，") || body;
+  p.A = "";
+  p.R = resClauses.join("，");
+  if (/独立|自己|亲手|主导/.test(body)) p.own = "个人独立主导推进";
+}
+
+/* ============ 10. 每一张牌都由用户亲手抽取 + 极简高密度对话流 ============ */
+function initLandingTable(fast = false) {
+  $("#reshuffleBtn").classList.add("hide");
+  runFlourishAndPick({
+    container: $("#tableArena"),
+    cardMeta: CARDS[0],
+    totalDeck: 18,
+    fanCount: 7,
+    whisperEl: $("#whisperText"),
+    fast,
+    onPicked: () => startCardOneChat()
+  });
+  // 等扇面展开后轻轻亮出「重新洗牌」微按钮
+  setTimeout(() => { if (S.screen === "landing" && !demoRunning) $("#reshuffleBtn").classList.remove("hide"); }, fast ? 1100 : 1850);
+}
+$("#reshuffleBtn").addEventListener("click", () => { if (!demoRunning) initLandingTable(false); });
+
+function startCardOneChat() {
+  S = freshState();
+  S.screen = "reading";
+  S.cardIdx = 0;
+  S.unlockedCard = 0;
+  S.step = "c1_basic";
+  saveState();
+  $("#chatStream").innerHTML = "";
+  syncUI();
+  appendMessage({
+    type: "bot",
+    tag: "I · 魔术师",
+    html: "<b>一句话报家门</b>：公司、岗位、起止年月？<span class='hintSub'>可匿名 · 有想投的方向可顺口带一句</span>"
+  });
+  setQuickChips([
+    { label: "例：可灵 AI，产品运营，2024.09至今", fill: "可灵 AI，产品运营（创作者生态与增长），2024.09至今，想看 AI 增长产品经理" },
+    { label: "例：某互联网大厂，后端研发，2023.07至今", fill: "某互联网大厂，后端研发工程师，2023.07至今" }
+  ]);
+  if (!demoRunning) $("#chatInput").focus();
+}
+
+// 弹出扇面，让用户亲手抽取第二张（正义）或第三张（Offer 王牌）！
+function openUserPickModal(cardIdx, promptText, fast = false) {
+  return new Promise(async resolve => {
+    const modal = $("#drawModal");
+    $("#drawHeading").textContent = CARDS[cardIdx].heading;
+    $("#drawPrompt").textContent = promptText;
+    $("#drawWhisper").textContent = "洗牌中…";
+    $("#revealCaption").classList.remove("show");
+    modal.classList.add("show");
+
+    await runFlourishAndPick({
+      container: $("#drawArena"),
+      cardMeta: CARDS[cardIdx],
+      totalDeck: 13,
+      fanCount: 5,
+      whisperEl: $("#drawWhisper"),
+      captionEl: $("#revealCaption"),
+      fast,
+      onPicked: () => {
+        modal.classList.remove("show");
+      }
+    });
+    resolve();
+  });
+}
+
+let busy = false;
+async function submitUserText(forcedText) {
+  if (busy) return;
+  const inp = $("#chatInput");
+  const text = (forcedText != null ? forcedText : inp.value).trim();
+  if (!text) return;
+  if (forcedText == null) { inp.value = ""; autoResizeInput(); }
+
+  busy = true;
+  $("#sendBtn").disabled = true;
+  setQuickChips([]);
+  appendMessage({ type: "user", text });
+
+  try { await handleStep(text); }
+  finally { busy = false; $("#sendBtn").disabled = false; saveState(); syncUI(); }
+}
+
+async function handleStep(text) {
+  if (S.step === "c1_basic") {
+    showTyping();
+    let basic;
+    if (llmReady()) {
+      try {
+        basic = parseJSON(await callLLM([{ role: "system", content: buildSysPrompt() }, { role: "user", content: `提取基本信息JSON：{"company":"","title":"","start":"YYYY.MM或空","end":"YYYY.MM或至今或空","targetRole":""}。原话：「${text}」` }], 260));
+      } catch (e) { basic = parseBasicFromSentence(text); }
+    } else { await sleep(300); basic = parseBasicFromSentence(text); }
+    removeTyping();
+    S.basic = { ...S.basic, ...basic };
+    S.step = "c1_scope";
+    appendMessage({
+      type: "bot",
+      tag: "I · 魔术师",
+      html: `收到 <b>${esc(S.basic.company)} · ${esc(S.basic.title)}</b>。<br>大白话聊聊：<b>平时主要扛哪 3–5 摊事？</b><span class='hintSub'>顺口点一下最拿得出手的 1–2 摊</span>`
+    });
+    setQuickChips([{ label: "感觉平时都在打杂，帮我拆一下", send: "其实感觉每天都在打杂，常规执行、对接需求和维护日常" }]);
+    return;
+  }
+
+  if (S.step === "c1_scope") {
+    showTyping();
+    let parsed;
+    if (llmReady()) {
+      try {
+        parsed = parseJSON(await callLLM([{ role: "system", content: buildSysPrompt() }, { role: "user", content: `基本：${JSON.stringify(S.basic)}；工作：「${text}」。输出JSON：{"roleFamily":"recruiting|engineering|product|operations|sales|general","workItems":[{"name":"","priority":"core|routine","content":"","action":"","tools":""}],"positioning":"1句犀利版图杠杆定位"}` }], 900));
+      } catch (e) { parsed = parseScopeFromText(text); }
+    } else { await sleep(420); parsed = parseScopeFromText(text); }
+    removeTyping();
+    S.roleFamily = ROLE_PROFILES[parsed.roleFamily] ? parsed.roleFamily : guessRole(S.basic.title, text);
+    S.workItems = (parsed.workItems && parsed.workItems.length ? parsed.workItems : parseScopeFromText(text).workItems).map((it, i) => ({
+      id: "w" + (i + 1), name: it.name || ("工作" + (i + 1)), priority: it.priority === "core" ? "core" : "routine",
+      content: it.content || "", baseline: "", action: it.action || "", serve: "", tools: it.tools || "", results: "", value: "",
+      completeness: { content: !!it.content, baseline: false, action: !!it.action, tools: !!it.tools, results: false, value: false }
+    }));
+    S.positioning = parsed.positioning || "";
+    S.step = "c1_confirm";
+
+    appendMessage({ type: "scopeCard" });
+    setQuickChips([
+      { label: "✦ 抽第二张牌", kind: "action", onClick: () => beginCardTwo() },
+      { label: "＋ 补一摊事", fill: "另外我还负责：" }
+    ]);
+    return;
+  }
+
+  if (S.step === "c1_confirm") {
+    if (/抽|翻|继续|好|没问题/.test(text)) { await beginCardTwo(); return; }
+    parseScopeFromText(text).workItems.forEach(it => { it.id = "w" + (S.workItems.length + 1); S.workItems.push(it); });
+    $$('[data-scope-card="1"]').forEach(c => { c.innerHTML = buildScopeCardHTML(); });
+    setQuickChips([{ label: "✦ 抽第二张牌", kind: "action", onClick: () => beginCardTwo() }]);
+    return;
+  }
+
+  if (S.step === "c2_baseline") {
+    const it = S.workItems[S.curItemIdx];
+    if (!/^(跳过|直接)/.test(text)) { it.baseline = text; it.completeness.baseline = true; }
+    S.step = "c2_impact";
+    updateScaleWidget();
+    showTyping(); await sleep(300); removeTyping();
+    const rp = getRP();
+    appendMessage({
+      type: "bot",
+      tag: `XI · 正义（${it.name}）`,
+      html: `反差立住了。<b>做完后拿出了什么数？交出去谁直接用了？</b>`
+    });
+    setQuickChips([
+      ...rp.dims.slice(0, 3).map(d => ({ label: "+ " + d, fill: d })),
+      { label: "没数，帮我倒推", onClick: () => appendMessage({ type: "bot", tag: "量级倒推", html: `<b>${esc(rp.estimateFormula)}</b><span class='hintSub'>说个大概量级就行，绝不胡编</span>` }) },
+      { label: "跳过这摊", kind: "subtle", onClick: () => advanceCoreItem() }
+    ]);
+    return;
+  }
+
+  if (S.step === "c2_impact") {
+    const it = S.workItems[S.curItemIdx];
+    it.results = text;
+    if (/独立|主导|拍板|自己|亲手/.test(text)) { it.action = it.action || "独立主导落地"; it.completeness.action = true; }
+    if (hasNum(text)) it.completeness.results = true;
+    if (/支持|支撑|服务|帮助|提供|提升|缩短|减少|节省|决策|反哺|复盘|转化|留存|复购|降本|复用|工作台|业务方|客户|团队|首充|曝光/.test(text)) { it.value = text; it.completeness.value = true; }
+    syncMetricsLibrary();
+    updateScaleWidget();
+
+    const needsCal = /[%％]|覆盖率|转化率/.test(text) && !/口径|分母|基线/.test(text);
+    const needsOwn = !it.completeness.action && it.completeness.results;
+    if (needsCal || needsOwn) {
+      S.step = "c2_cal";
+      showTyping(); await sleep(280); removeTyping();
+      if (needsCal) {
+        appendMessage({ type: "bot", tag: "口径护航", html: "<b>这个百分比/转化率的分母口径是什么？怎么排除大盘自然涨幅？</b><span class='hintSub'>写清口径与对照，面试一问就稳</span>" });
+        setQuickChips([
+          { label: "首日至少完成 1 次有效生成占比（A/B 实验对照）", send: "首日完成至少 1 次有效视频生成占比，且经同周期 A/B 实验对照验证" },
+          { label: "对比上线前后同周期数据", send: "对比上线前后同周期数据" },
+          { label: "先跳过", kind: "subtle", onClick: () => advanceCoreItem() }
+        ]);
+      } else {
+        appendMessage({ type: "bot", tag: "个人边界", html: "<b>你在里面是：拍板、主刀，还是协同？</b>" });
+        setQuickChips([
+          { label: "独立拍板主导", send: "独立拍板并主导落地" },
+          { label: "核心主刀落地", send: "核心主刀从头落地" },
+          { label: "团队协同参与", send: "协同参与关键模块" }
+        ]);
+      }
+      return;
+    }
+    await advanceCoreItem();
+    return;
+  }
+
+  if (S.step === "c2_cal") {
+    const it = S.workItems[S.curItemIdx];
+    if (/拍板|独立|主导/.test(text)) { it.action = "独立主导落地"; it.completeness.action = true; }
+    else if (/主刀/.test(text)) { it.action = "核心主刀落地"; it.completeness.action = true; }
+    else if (/协同|参与/.test(text)) { it.action = "协同推进关键模块"; it.completeness.action = true; }
+    else if (!/跳过/.test(text)) { it.results += `（口径：${text.replace(/算的$/g, "").trim()}）`; }
+    syncMetricsLibrary();
+    updateScaleWidget();
+    await advanceCoreItem();
+    return;
+  }
+
+  if (S.step === "c2_routine") {
+    if (!/^(跳过|没有|直接)/.test(text)) {
+      const segs = text.split(/[；;\n。]+/).map(s => s.trim()).filter(Boolean);
+      S.routineIndices.forEach((idx, i) => {
+        const v = segs[i] || (segs.length === 1 && i === 0 ? segs[0] : "");
+        if (v) { S.workItems[idx].results = v; S.workItems[idx].completeness.results = hasNum(v); S.workItems[idx].completeness.value = true; }
+      });
+      syncMetricsLibrary();
+    }
+    S.step = "c2_ready";
+    appendMessage({ type: "bot", tag: "XI · 正义落秤", html: "日常基本盘已全部称稳。<b>准备抽最后一张牌。</b>" });
+    setQuickChips([{ label: "✦ 抽第三张牌", kind: "action", onClick: () => beginCardThree() }]);
+    return;
+  }
+
+  if (S.step === "c2_ready") { await beginCardThree(); return; }
+
+  if (S.step === "c3_story") {
+    if (/^(跳过|没有|直接)/.test(text)) { await finishAndGenerate(); return; }
+    const p = { id: "p" + (S.projects.length + 1), name: "", S: "", T: "", A: "", R: "", hard: "", decision: "", own: "", asset: "" };
+    showTyping();
+    if (llmReady()) {
+      try {
+        const j = parseJSON(await callLLM([{ role: "system", content: buildSysPrompt() }, { role: "user", content: `口述项目：「${text}」。抽取已有字段，给出1句最拉段位的方案权衡追问。JSON：{"name":"","S":"","T":"","A":"","R":"","hard":"","decision":"","own":"","asset":"","nextQ":""}` }], 650));
+        Object.assign(p, j); p._nextQ = j.nextQ;
+      } catch (e) { fillProjFromRaw(p, text); }
+    } else { await sleep(340); fillProjFromRaw(p, text); }
+    removeTyping();
+    S.curProj = p;
+    S.step = "c3_decision";
+    appendMessage({
+      type: "bot",
+      tag: `ACE · 挖判断力（${p.name}）`,
+      html: p._nextQ ? esc(p._nextQ) : "<b>为什么拍板选这个解法，放弃了常规套路？</b><span class='hintSub'>顺口说一句：哪几步离了你真转不动</span>"
+    });
+    setQuickChips([
+      { label: "没预算/等不及排期，自己降维切入", fill: "常规做法没预算且等不及研发排期，我拍板换切口独立打通全链路" },
+      { label: "跳过", kind: "subtle", send: "跳过" }
+    ]);
+    return;
+  }
+
+  if (S.step === "c3_decision") {
+    const p = S.curProj;
+    if (!/^跳过/.test(text)) {
+      p.decision = text;
+      p.own = /独立|自己|全链|拍板|主导|亲手/.test(text) ? text : (p.own || "核心主刀关键拐点");
+    }
+    S.step = "c3_result";
+    showTyping(); await sleep(280); removeTyping();
+    appendMessage({
+      type: "bot",
+      tag: "ACE · 战果与沉淀",
+      html: "<b>最后拿到什么战果？有没有留下你走了还在运转的武器？</b><span class='hintSub'>没精确数先留待补充，绝不硬编</span>"
+    });
+    setQuickChips([
+      { label: "沉淀了一套可复用工作台/SOP", fill: "沉淀了一套团队可持续检索复用的工作台系统" },
+      { label: "✦ 够了，直接合牌出简历", kind: "action", onClick: () => finalizeCurProj(true) }
+    ]);
+    return;
+  }
+
+  if (S.step === "c3_result") {
+    const p = S.curProj;
+    if (!/^跳过/.test(text)) {
+      const sp = text.match(/^([\s\S]*?)[，,；;。]?\s*(?:并|且|同时)?(?:沉淀出|沉淀了|沉淀|留下|产出)(?:一套|一个)?([\s\S]+)$/);
+      if (sp) {
+        if (sp[1].trim()) p.R = p.R ? (p.R + "；" + sp[1].trim()) : sp[1].trim();
+        if (sp[2].trim()) p.asset = sp[2].trim();
+      } else if (/工作台|系统|工具|SOP|模板|数据池|资产|手册|复用/.test(text) && !hasNum(text) && !/【待补充/.test(text)) {
+        p.asset = text;
+      } else {
+        p.R = p.R ? (p.R + "；" + text) : text;
+      }
+    }
+    await finalizeCurProj(false);
+    return;
+  }
+
+  if (S.step === "c3_more") {
+    if (/再加|再聊|再抽|还有/.test(text)) startAnotherProject();
+    else await finishAndGenerate();
+  }
+}
+
+async function beginCardTwo(fast = false) {
+  await openUserPickModal(1, "选出你的第二张牌", fast);
+  S.cardIdx = 1;
+  S.unlockedCard = Math.max(S.unlockedCard, 1);
+  S.coreQueue = S.workItems.map((it, i) => it.priority === "core" ? i : -1).filter(i => i >= 0);
+  S.routineIndices = S.workItems.map((it, i) => it.priority !== "core" ? i : -1).filter(i => i >= 0);
+  if (!S.coreQueue.length && S.workItems.length) S.coreQueue = [0];
+  S.curItemIdx = S.coreQueue[0] || 0;
+  saveState(); syncUI();
+  askCoreBaseline();
+}
+
+function askCoreBaseline() {
+  const it = S.workItems[S.curItemIdx];
+  S.step = "c2_baseline";
+  updateScaleWidget();
+  appendMessage({
+    type: "bot",
+    tag: `XI · 正义（★ ${it.name}）`,
+    html: `<b>在你做「${esc(it.name)}」之前，团队怎么干、最卡在哪？</b>`
+  });
+  setQuickChips([
+    { label: "以前纯手工/盲打，滞后低效", fill: "此前纯靠传统手工方式，信息滞后且效率低" },
+    { label: "直接聊数字", kind: "subtle", send: "直接问成果" }
+  ]);
+}
+
+async function advanceCoreItem() {
+  const pos = S.coreQueue.indexOf(S.curItemIdx);
+  if (pos >= 0 && pos + 1 < S.coreQueue.length) {
+    S.curItemIdx = S.coreQueue[pos + 1];
+    saveState();
+    askCoreBaseline();
+    return;
+  }
+  if (S.routineIndices.length) {
+    S.step = "c2_routine";
+    const names = S.routineIndices.map(i => `「${S.workItems[i].name}」`).join("、");
+    appendMessage({
+      type: "bot",
+      tag: "XI · 常规盘速过",
+      html: `主角称稳了。其余常规盘（<b>${esc(names)}</b>）<b>一句话带过</b>交付或范围即可：`
+    });
+    setQuickChips([{ label: "✦ 跳过，直接抽第三张牌", kind: "action", onClick: () => beginCardThree() }]);
+  } else {
+    S.step = "c2_ready";
+    setQuickChips([{ label: "✦ 抽第三张牌", kind: "action", onClick: () => beginCardThree() }]);
+  }
+}
+
+async function beginCardThree(fast = false) {
+  await openUserPickModal(2, "选出你的第三张牌", fast);
+  S.cardIdx = 2;
+  S.unlockedCard = 2;
+  S.step = "c3_story";
+  saveState(); syncUI();
+  appendMessage({
+    type: "bot",
+    tag: "ACE · 星币首牌 OFFER",
+    html: "<b>挑一件最能帮你敲开 Offer 的硬仗，像讲故事一样随口说说？</b><span class='hintSub'>从 0 到 1 摸出来的、救过火的、或解了死结的事</span>"
+  });
+  setQuickChips([
+    ...S.workItems.filter(x => x.priority === "core").map(it => ({ label: "就聊：" + it.name, fill: `${it.name}：` })),
+    { label: "先直接出稿", kind: "subtle", onClick: () => finishAndGenerate() }
+  ]);
+}
+
+async function finalizeCurProj(goNow) {
+  if (S.curProj && (S.curProj.name || S.curProj.S)) {
+    const idx = S.projects.findIndex(x => x.id === S.curProj.id);
+    const snap = JSON.parse(JSON.stringify(S.curProj));
+    delete snap._nextQ;
+    if (idx >= 0) S.projects[idx] = snap; else S.projects.push(snap);
+    S.curProj = null;
+    syncMetricsLibrary(); saveState();
+  }
+  if (goNow) { await finishAndGenerate(); return; }
+  S.step = "c3_more";
+  appendMessage({ type: "bot", tag: "ACE · 王牌入档", html: `已收录 <b>${S.projects.length}</b> 个独立项目。现在合牌出简历，还是再加一仗？` });
+  setQuickChips([
+    { label: "✦ 三牌合阵 · 生成简历", kind: "action", onClick: () => finishAndGenerate() },
+    { label: "＋ 再讲一场硬仗", onClick: () => startAnotherProject() }
+  ]);
+}
+
+function startAnotherProject() {
+  S.screen = "reading"; S.cardIdx = 2; S.step = "c3_story"; syncUI();
+  appendMessage({ type: "bot", tag: "ACE · 新增项目", html: "<b>直接讲第二个项目的背景和你是怎么打赢的？</b>" });
+  setQuickChips([{ label: "直接合牌出稿 ✦", kind: "action", onClick: () => finishAndGenerate() }]);
+}
+
+/* ============ 11. 生成结果与原地补数 ============ */
+function buildDynamicDefenses() {
+  const rp = getRP(), defs = [];
+  const txt = JSON.stringify({ w: S.workItems, p: S.projects });
+  if (/出片率|转化率|留存|%|％|pp/.test(txt)) defs.push({ q: "核心转化/留存提升这么多，怎么剥离同期模型升级或大盘自然涨幅？", prepare: "准备同周期 A/B 实验对照数据或漏斗分环节拆解，证明净增量来自你的动作。" });
+  if (/A\/B|模板|SOP|自动化|大模型|LLM|AI/i.test(txt) && S.roleFamily === "operations") defs.push({ q: "全网大曝光里自然流量和投放占比各多少？后端留存与付费怎么承接的？", prepare: "区分自然裂变 vs 采买流量，备好单客成本及向产品首单激活的转化数据。" });
+  rp.defenses.forEach(d => { if (defs.length < 3 && !defs.some(x => x.q === d.q)) defs.push(d); });
+  return defs.slice(0, 3);
+}
+function mockGenerate() {
+  syncMetricsLibrary();
+  const b = S.basic, rp = getRP();
+  const dates = (b.start && b.end) ? `${b.start}–${b.end}` : "【待补充：起止年月】";
+  const positioning = `${b.company || "【待补充：公司】"} · ${b.title || "【待补充：岗位】"} · ${dates}`;
+  const sorted = [...S.workItems].sort((a, b2) => (b2.priority === "core") - (a.priority === "core"));
+  const bullets = sorted.map(it => {
+    if (it.priority === "core") {
+      const head = it.baseline ? `针对${it.baseline.replace(/^针对/, "")}，` : "";
+      const body = `${it.action ? it.action + "：" : ""}${it.name}${it.content && it.content !== it.name ? `（${it.content}）` : ""}`;
+      return head + body + (it.results ? `；${it.results}` : "；【待补充：量化成果与下游价值】");
+    }
+    return it.name + (it.content && it.content !== it.name ? `：${it.content}` : "") + (it.results ? `，${it.results}` : "，【待补充：范围或量级】");
+  });
+  const projects = S.projects.map(p => {
+    const roleTag = /独立|主导|拍板/.test(p.own || p.decision || "") ? "独立主导" : "核心主刀";
+    const lines = [
+      p.S ? `背景与卡点：${p.S}` : "",
+      (p.decision || p.A) ? `方案与权衡：${[p.decision, p.A].filter(Boolean).join("；")}` : "",
+      (p.R || p.asset) ? `结果与沉淀：${[p.R || "【待补充：量化结果】", p.asset ? `沉淀资产：${p.asset}` : ""].filter(Boolean).join("；")}` : ""
+    ].filter(Boolean).join("\n");
+    return { name: p.name || "代表性攻坚项目", tagline: roleTag + (p.T ? ` ｜ ${p.T}` : ""), star: lines };
+  });
+  const gaps = [];
+  if (!b.start || !b.end) gaps.push({ what: "任职起止年月", todo: "补全 YYYY.MM–YYYY.MM", where: "核对 Offer 或社保记录" });
+  sorted.forEach(it => { if (!hasNum(it.results) || /【待补充/.test(it.results)) gaps.push({ what: `「${it.name}」量化数字`, todo: "补 1 个数字或倒推量级", where: rp.estimateFormula }); });
+  S.projects.forEach(p => { if (!hasNum(p.R) || /【待补充/.test(p.R)) gaps.push({ what: `项目「${p.name || "项目"}」提效对比`, todo: "补上线前后耗时或触达对比", where: "翻系统启用前后 2 周记录" }); });
+  const isAiOps = S.roleFamily === "operations" && /AI|Prompt|模型|模板|A\/B|出片/i.test(JSON.stringify(S.workItems));
+  return {
+    archetype: isAiOps ? "破局造浪者 · AI 增长传导中枢" : `破局践行者 · ${rp.name}价值杠杆位`,
+    archetypeSummary: S.positioning || `兼具业务纵深与落地能力的 ${rp.name} 实践者`,
+    workSection: { positioning, bullets },
+    projects,
+    metrics: S.metricsLibrary.map(m => m.value).slice(0, 10),
+    gaps: gaps.slice(0, 5),
+    defense: buildDynamicDefenses()
+  };
+}
+async function finishAndGenerate(refine = "") {
+  syncMetricsLibrary();
+  let data;
+  if (llmReady()) {
+    const slim = { basic: S.basic, roleFamily: S.roleFamily, positioning: S.positioning, workItems: S.workItems, metricsLibrary: S.metricsLibrary, projects: S.projects };
+    try {
+      data = parseJSON(await callLLM([
+        { role: "system", content: buildSysPrompt() },
+        { role: "user", content: `档案：${JSON.stringify(slim)}\n${refine ? `精修：${refine}\n` : ""}输出JSON：{"archetype":"","archetypeSummary":"","workSection":{"positioning":"","bullets":[""]},"projects":[{"name":"","tagline":"","star":""}],"metrics":[""],"gaps":[{"what":"","todo":"","where":""}],"defense":[{"q":"","prepare":""}]}。绝不编造数字，缺数标【待补充：项】。` }
+      ], 1800));
+    } catch (e) { data = mockGenerate(); }
+  } else data = mockGenerate();
+  S.output = data; S.screen = "result"; saveState();
+  renderResult(); syncUI();
+  StarEngine.burstPoint(window.innerWidth / 2, 160, 55);
+}
+function markInteractive(s, scope, idx) {
+  let k = 0;
+  return esc(s).replace(/【待补充：([^】]*)】/g, (_, inner) => `<span class="ph" role="button" tabindex="0" data-scope="${esc(scope)}" data-idx="${idx}" data-ph="${k++}" data-hint="${esc(inner)}" title="点击原地补数">【待补充：${inner}】</span>`);
+}
+function renderResult() {
+  const d = S.output || mockGenerate();
+  $("#sp1").src = CARDS[0].src; $("#sp2").src = CARDS[1].src; $("#sp3").src = CARDS[2].src;
+  $("#archetypeBox").innerHTML = `<div class="archTitle">✦ ${esc(d.archetype)} ✦</div><div class="archSub">${esc(d.archetypeSummary || "")}</div>`;
+  const ws = d.workSection || { positioning: "", bullets: [] };
+  $("#workList").innerHTML = (ws.positioning ? `<li><span class="pos">${markInteractive(ws.positioning, "pos", 0)}</span></li>` : "") + (ws.bullets || []).map((b, i) => `<li>${markInteractive(b, "bullet", i)}</li>`).join("");
+  $("#projList").innerHTML = (d.projects && d.projects.length) ? d.projects.map((p, i) => `<div class="projBlock"><div class="pn">${esc(p.name)}</div><div class="pt">${esc(p.tagline || "")}</div><div class="ps">${markInteractive(p.star || "", "proj", i)}</div></div>`).join("") : '<div class="sNote">暂无项目，点下方随时补抽。</div>';
+  const ms = d.metrics || []; $("#metricSec").style.display = ms.length ? "block" : "none"; $("#metricList").innerHTML = ms.map(m => `<span>${esc(m)}</span>`).join("");
+  $("#gapList").innerHTML = (d.gaps && d.gaps.length) ? d.gaps.map(g => `<li><span class="todo">待补</span><span><b style="color:var(--paper)">${esc(g.what)}</b>——${esc(g.todo)}<br><span class="where">${esc(g.where)}</span></span></li>`).join("") : '<li><span style="color:var(--ok)">✦ 弹药齐备！</span></li>';
+  const df = d.defense || []; $("#defSec").style.display = df.length ? "block" : "none"; $("#defList").innerHTML = df.map(x => `<li><b style="color:var(--paper)">「${esc(x.q)}」</b><br><span class="where">${esc(x.prepare)}</span></li>`).join("");
+  window._workText = (ws.positioning ? ws.positioning + "\n" : "") + (ws.bullets || []).map(b => "· " + b).join("\n");
+  window._projText = (d.projects || []).map(p => `【${p.name}】${p.tagline ? "\n" + p.tagline : ""}\n${p.star || ""}`).join("\n\n");
+}
+
+/* 原地填空 */
+let activeFill = null;
+const fillDlg = $("#fillDlg");
+$("#result").addEventListener("click", e => {
+  const ph = e.target.closest(".ph"); if (!ph) return;
+  activeFill = { scope: ph.dataset.scope, idx: +ph.dataset.idx, phIdx: +ph.dataset.ph, hint: ph.dataset.hint };
+  $("#fillPrompt").textContent = `补齐「${activeFill.hint}」`;
+  $("#fillInput").value = ""; fillDlg.showModal(); setTimeout(() => $("#fillInput").focus(), 40);
+});
+function replaceNthPh(str, n, val) {
+  let c = 0;
+  return String(str).replace(/【待补充：[^】]*】/g, (m, off, full) => {
+    if (c++ !== n) return m;
+    const prev = off > 0 ? full[off - 1] : "";
+    return (prev && !/[，,；;：:（(\s—–-]/.test(prev)) ? ("，" + val) : val;
+  });
+}
+$("#fillConfirm").addEventListener("click", () => {
+  const val = $("#fillInput").value.trim();
+  if (!val || !activeFill || !S.output) { fillDlg.close(); return; }
+  const out = S.output, tok = `【待补充：${activeFill.hint}】`;
+  if (activeFill.scope === "pos") out.workSection.positioning = replaceNthPh(out.workSection.positioning, activeFill.phIdx, val);
+  else if (activeFill.scope === "bullet") {
+    out.workSection.bullets[activeFill.idx] = replaceNthPh(out.workSection.bullets[activeFill.idx], activeFill.phIdx, val);
+    S.workItems.forEach(it => { if (it.results && it.results.includes(tok)) { it.results = it.results.replace(tok, val); out.gaps = (out.gaps || []).filter(g => !g.what.includes(it.name)); } });
+  } else if (activeFill.scope === "proj") {
+    out.projects[activeFill.idx].star = replaceNthPh(out.projects[activeFill.idx].star, activeFill.phIdx, val);
+    const p = S.projects[activeFill.idx];
+    if (p && p.R && p.R.includes(tok)) { p.R = p.R.replace(tok, val); out.gaps = (out.gaps || []).filter(g => !g.what.includes(p.name || "")); }
+  }
+  extractMetricsFromText(val, "inline").forEach(m => { out.metrics = out.metrics || []; if (!out.metrics.includes(m.value)) out.metrics.push(m.value); });
+  saveState(); renderResult(); fillDlg.close(); toast("已升级简历 ✦");
+});
+$("#fillCancel").addEventListener("click", () => fillDlg.close());
+fillDlg.addEventListener("click", e => { if (e.target === fillDlg) fillDlg.close(); });
+
+function copy(t) {
+  const done = () => toast("已复制 ✦");
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(fb); else fb();
+  function fb() { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) {} ta.remove(); }
+}
+$("#copyWork").addEventListener("click", () => copy(window._workText || ""));
+$("#copyProj").addEventListener("click", () => copy(window._projText || ""));
+$("#copyAll").addEventListener("click", () => copy(["【工作经历】\n" + (window._workText || ""), window._projText ? ("【代表性项目】\n" + window._projText) : ""].filter(Boolean).join("\n\n")));
+$("#backToChatBtn").addEventListener("click", () => { S.screen = "reading"; saveState(); syncUI(); scrollChatBottom(); });
+$("#moreProjBtn").addEventListener("click", () => startAnotherProject());
+$("#refineBtn").addEventListener("click", async () => {
+  const txt = $("#refineInput").value.trim(); if (!txt) return;
+  if (!llmReady()) { toast("点左上 ⚙ 接入大模型即可自然语言精修"); return; }
+  const btn = $("#refineBtn"); btn.classList.add("loading"); btn.textContent = "精修中…";
+  await finishAndGenerate(txt);
+  btn.classList.remove("loading"); btn.textContent = "微 调"; $("#refineInput").value = "";
+});
+
+/* Settings */
+const settingsDlg = $("#settingsDlg");
+$("#settingsBtn").addEventListener("click", () => {
+  $("#cfgBase").value = (llmCfg && llmCfg.base) || "https://api.deepseek.com/v1";
+  $("#cfgModel").value = (llmCfg && llmCfg.model) || "deepseek-chat";
+  $("#cfgKey").value = (llmCfg && llmCfg.key) || ""; $("#cfgKey").type = "password";
+  $("#cfgStatus").textContent = llmReady() ? `已接入 ${llmCfg.model}` : "当前：本地演示引擎";
+  settingsDlg.showModal();
+});
+$("#toggleKeyVis").addEventListener("click", () => { const i = $("#cfgKey"); i.type = i.type === "password" ? "text" : "password"; });
+$("#cfgClose").addEventListener("click", () => settingsDlg.close());
+settingsDlg.addEventListener("click", e => { if (e.target === settingsDlg) settingsDlg.close(); });
+$("#cfgSave").addEventListener("click", () => {
+  llmCfg = { base: $("#cfgBase").value.trim(), model: $("#cfgModel").value.trim(), key: $("#cfgKey").value.trim() };
+  try { localStorage.setItem(LLM_KEY, JSON.stringify(llmCfg)); } catch (e) {}
+  updateEngineNote(); $("#cfgStatus").textContent = llmReady() ? "已保存 ✦" : "已保存（本地引擎）"; toast("设置已保存");
+});
+$("#cfgTest").addEventListener("click", async () => {
+  const tmp = { base: $("#cfgBase").value.trim(), model: $("#cfgModel").value.trim(), key: $("#cfgKey").value.trim() };
+  if (!tmp.base || !tmp.model || !tmp.key) { $("#cfgStatus").textContent = "三项都要填"; return; }
+  $("#cfgStatus").textContent = "测试中…"; const old = llmCfg; llmCfg = tmp;
+  try { await callLLM([{ role: "user", content: "只回复：就位" }], 20); $("#cfgStatus").textContent = "连接成功 ✦"; }
+  catch (e) { $("#cfgStatus").textContent = "失败：" + e.message; }
+  llmCfg = old;
+});
+
+/* ============ 12. 魔术光点自动演播式「一键演示」 ============ */
+let demoRunning = false, demoAbort = false;
+async function demoGuidePick(preferIndex, slowReveal = true) {
+  for (let t = 0; t < 60 && !activeFanControl && !demoAbort; t++) await sleep(100);
+  if (!activeFanControl || demoAbort) return;
+  const { keptCards, applyHover, pickCard } = activeFanControl;
+  const spark = $("#demoSpark");
+  const idx = Math.min(preferIndex, keptCards.length - 1);
+  const path = [Math.max(0, idx - 2), Math.max(0, idx - 1), idx];
+  spark.classList.add("show");
+  for (const stepIdx of path) {
+    if (demoAbort) break;
+    const rect = keptCards[stepIdx].getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    spark.style.left = cx + "px"; spark.style.top = cy + "px";
+    applyHover(stepIdx);
+    StarEngine.trail(cx, cy);
+    await sleep(460);
+  }
+  await sleep(220);
+  spark.classList.remove("show");
+  if (!demoAbort && activeFanControl) await pickCard(keptCards[idx], !slowReveal);
+}
+
+// 模拟真实阅读与输入节奏：先给观众时间看清提问，再轻柔填入输入栏并发送，最后留出阅读停顿
+async function demoSay(text, readBeforeMs = 1500, readAfterMs = 1200) {
+  if (demoAbort) return;
+  await sleep(readBeforeMs);
+  if (demoAbort) return;
+  const inp = $("#chatInput");
+  // 轻盈预览填入输入框 380ms，让观众感知“聊天输入”而非瞬移
+  inp.value = text;
+  autoResizeInput();
+  await sleep(420);
+  if (demoAbort) return;
+  await submitUserText();
+  if (readAfterMs > 0) await sleep(readAfterMs);
+}
+
+async function smoothScrollResultShowcase() {
+  const el = $("#result");
+  const maxScroll = el.scrollHeight - el.clientHeight;
+  if (maxScroll <= 20) return;
+  await sleep(1800);
+  if (demoAbort) return;
+  const duration = 5600 * SLOWMO;
+  const startTime = performance.now();
+  await new Promise(resolve => {
+    function step(now) {
+      if (demoAbort) return resolve();
+      const t = Math.min(1, (now - startTime) / duration);
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      el.scrollTop = maxScroll * ease;
+      if (t < 1) requestAnimationFrame(step);
+      else resolve();
+    }
+    requestAnimationFrame(step);
+  });
+  await sleep(1300);
+}
+
+function buildInstantDemoState() {
+  S = freshState();
+  S.basic = { company: "可灵 AI", title: "产品运营（创作者生态与增长）", start: "2024.09", end: "至今", targetRole: "AI 应用产品运营 / 增长产品经理" };
+  S.roleFamily = "operations";
+  S.positioning = "稀缺的「AI 产品 × 增长运营」复合杠杆位：能把高门槛模型能力翻译成低摩擦增长与商业化闭环。";
+  S.workItems = [
+    { id: "w1", name: "创作者分层与模板冷启动", priority: "core", content: "搭建创作者成长分层体系与爆款 Prompt 模板库，降低新客首条视频生成门槛", baseline: "此前新用户面对空白 Prompt 输入框不知道怎么写，首日出片率长期卡在 22%，废片率高导致次留流失严重", action: "独立主导落地", serve: "C 端新客与创作者社区", tools: "Prompt 模板 / A/B 实验", results: "沉淀 300+ 高复用场景模板与一键同款流，新客首日出片率从 22% 提升至 41%（口径：首日完成至少 1 次有效视频生成占比，经同周期 A/B 实验对照验证），带动会员首充转化率提升 6.5pp", value: "直接向商业化首充转化传导", completeness: { content: true, baseline: true, action: true, tools: true, results: true, value: true } },
+    { id: "w2", name: "AI 创作大赛与社媒破圈增长", priority: "core", content: "策划主题 AI 短片创作赛与小红书/B站 KOC 矩阵，撬动优质样片沉淀与自然裂变", baseline: "早期社区样片同质化严重，外部讨论停留在尝鲜，缺少持续自然破圈内容", action: "独立主导落地", serve: "品牌增长与首页内容池", tools: "KOC 矩阵 / 创作赛", results: "操盘 3 期主题创作赛，累计征集优质投稿 1.2万+ 件、撬动全网自然曝光 8000万+，签约沉淀 Top 200 核心创作者池并反哺产品首页精选流与海外官宣素材库", value: "反哺首页内容池与海外宣发", completeness: { content: true, baseline: true, action: true, tools: true, results: true, value: true } },
+    { id: "w3", name: "版本发版与反馈闭环", priority: "routine", content: "承接模型大版本上线节奏，收集 Discord 与社群高频 Badcase 反馈并推动排期", baseline: "", action: "协同推进", serve: "算法与产品团队", tools: "Discord / 社群", results: "月均梳理 40+ 高频生成痛点专题单，推动运镜控制与首尾帧功能排期落地", value: "推动核心功能落地", completeness: { content: true, baseline: false, action: true, tools: true, results: true, value: true } },
+    { id: "w4", name: "商业化积分权益促活", priority: "routine", content: "协同策划节假日积分消耗与老客续费促活活动", baseline: "", action: "协同推进", serve: "商业化业务", tools: "权益活动", results: "拉动重点档期积分消耗与老客复购（【待补充：单次活动投入产出比 ROI】）", value: "拉动复购", completeness: { content: true, baseline: false, action: true, tools: false, results: false, value: true } },
+    { id: "w5", name: "核心转化漏斗数据看板", priority: "routine", content: "搭建注册→首次生成→满意下载→付费漏斗追踪看板并支持周度复盘", baseline: "", action: "", serve: "产品增长团队", tools: "SQL / 看板", results: "定位出图生视频排队超时流失卡点，推动队列提示与高优通道引导优化", value: "定位漏斗卡点", completeness: { content: true, baseline: false, action: false, tools: true, results: false, value: true } }
+  ];
+  S.projects = [{
+    id: "p1", name: "「一键同款」新客首单出片破局项目",
+    S: "新模型发版涌入大量尝鲜流量，小白用户写不出高质量 Prompt，生成 2 次不满意即永久流失，且研发排期极满拿不到复杂改版资源",
+    decision: "放弃等研发做重型『Prompt 教学学院』，也放弃纯靠发券买短期留存，拍板走最轻量的『爆款样片反向拆参 + 一键复用』路径，独立完成首批 300+ 模板定标、拉通算法配好兜底参数并主导 2 轮 A/B 灰度验证",
+    A: "", own: "独立主导方案拍板、首批 300+ 模板定标与 2 轮 A/B 灰度推进",
+    T: "在研发资源受限下快速抬升新客首日有效出片率与次日留存",
+    R: "实验组新客首日出片率从 22% 跃升至 41%、次日留存提升 8.4pp，带动付费转化提升（【待补充：实验组与对照组付费率差值】）",
+    asset: "一套「爆款样片自动入库 → 复用率优胜劣汰」运营 SOP 与模板评级标准"
+  }];
+  S.unlockedCard = 2; S.cardIdx = 2; syncMetricsLibrary();
+}
+
+$("#skipDemoBtn").addEventListener("click", async () => {
+  demoAbort = true; demoRunning = false;
+  $("#demoSpark").classList.remove("show");
+  $("#drawModal").classList.remove("show");
+  buildInstantDemoState();
+  await finishAndGenerate();
+});
+
+async function runCinematicDemo() {
+  if (demoRunning) return;
+  window.__DEMO_DONE__ = false;
+  demoRunning = true; demoAbort = false; syncUI();
+
+  if (!activeFanControl && !isFlourishing) initLandingTable(false);
+  await demoGuidePick(4, true);
+  if (demoAbort) return;
+
+  // 第一张牌：魔术师（放慢节奏，让观众清晰读完每一句对话与版图透视）
+  await demoSay("可灵 AI，产品运营（创作者生态与增长），2024.09至今，想看 AI 应用产品运营或增长产品经理", 1300, 1200);
+  await demoSay("★ 创作者分层与模板冷启动：搭建创作者成长分层体系与爆款 Prompt 模板库，降低新客首条视频生成门槛\n★ AI 创作大赛与社媒破圈增长：策划主题 AI 短片创作赛与小红书/B站 KOC 矩阵，撬动优质样片沉淀与自然裂变\n版本发版与反馈闭环：承接大版本发版，收集 Discord 和社群高频 Badcase 反馈推动算法与产品排期\n商业化积分权益促活：协同策划节假日积分消耗与老客续费促活活动\n核心转化漏斗数据看板：搭建注册到生成到付费的漏斗追踪看板支持周度复盘", 1500, 2600);
+  if (demoAbort) return;
+
+  // 亲手抽第二张牌：正义 + 实时倾斜天平称重
+  const p2 = beginCardTwo(false);
+  await demoGuidePick(2, true);
+  await p2;
+  if (demoAbort) return;
+
+  await demoSay("此前新用户面对空白 Prompt 输入框根本不知道怎么写，首日出片率长期卡在 22%，废片率高导致次留流失严重", 1500, 1300);
+  await demoSay("主导沉淀 300+ 高复用场景模板与一键同款流，上线后新客首日出片率从 22% 提升至 41%，直接带动会员首充转化率提升 6.5pp", 1500, 1400);
+  await demoSay("首日完成至少 1 次有效视频生成占比，且经同周期 A/B 实验对照验证", 1500, 1300);
+  await demoSay("早期社区样片同质化严重，外部社媒讨论只停留在技术尝鲜，缺少持续自然破圈内容", 1400, 1200);
+  await demoSay("独立操盘 3 期主题创作赛，累计征集优质投稿 1.2万+ 件、撬动全网自然曝光 8000万+，签约沉淀 Top 200 核心创作者池并反哺首页精选流与海外官宣素材库", 1500, 1400);
+  await demoSay("月均梳理 40+ 高频生成痛点专题单推动运镜控制和首尾帧落地；拉动重点档期积分消耗与老客复购（【待补充：单次活动投入产出比 ROI】）；定位图生视频排队超时流失卡点推动队列提示与高优通道优化", 1500, 1500);
+  if (demoAbort) return;
+
+  // 亲手抽第三张牌：星币首牌 OFFER
+  const p3 = beginCardThree(false);
+  await demoGuidePick(3, true);
+  await p3;
+  if (demoAbort) return;
+
+  await demoSay("「一键同款」新客首单出片破局项目：当时新模型发版涌入大量尝鲜流量，小白用户写不出高质量 Prompt 生成两次不满意就永久流失了，我联合设计推了爆款样片一键同款，实验组首日出片率从 22% 跃升至 41%、次日留存提升 8.4pp", 1500, 1400);
+  await demoSay("研发排期极满拿不到大改版资源，且小白没耐心看教程、发券只换来羊毛党，所以我拍板放弃做重型 Prompt 教学学院，走最轻量的爆款样片反向拆参加一键复用路径，独立完成首批 300+ 模板定标、拉通算法配兜底参数并主导 2 轮 A/B 灰度验证", 1600, 1500);
+  await demoSay("带动付费转化提升（【待补充：实验组与对照组付费率差值】），并沉淀出一套「爆款样片自动入库 → 复用率优胜劣汰」运营 SOP 与模板评级标准", 1500, 1400);
+  if (demoAbort) return;
+
+  await finishAndGenerate();
+  await smoothScrollResultShowcase();
+  demoRunning = false; syncUI();
+  window.__DEMO_DONE__ = true;
+  if (!RECORD_MODE) toast("演示完成 ✦ 点红色【待补充】可直接补数");
+}
+$("#demoBtn").addEventListener("click", runCinematicDemo);
+
+$("#restart").addEventListener("click", () => {
+  if (!confirm("重新洗牌？当前进度会清空。")) return;
+  S = freshState(); saveState(); syncUI(); initLandingTable(false);
+});
+
+function restoreQuickChips() {
+  if (S.step === "c1_confirm") setQuickChips([{ label: "✦ 抽第二张牌", kind: "action", onClick: () => beginCardTwo() }]);
+  else if (S.step === "c2_ready") setQuickChips([{ label: "✦ 抽第三张牌", kind: "action", onClick: () => beginCardThree() }]);
+  else if (S.step === "c3_more") setQuickChips([{ label: "✦ 三牌合阵 · 生成简历", kind: "action", onClick: () => finishAndGenerate() }, { label: "＋ 再讲一场硬仗", onClick: () => startAnotherProject() }]);
+}
+
+/* ============ 13. 启动：进门即上演星尘花式洗牌，支持 ?demo=1 直接进入宣传片演示 ============ */
+(function boot() {
+  updateEngineNote();
+  if (AUTO_DEMO) {
+    S = freshState();
+    saveState();
+    S.screen = "landing";
+    syncUI();
+    initLandingTable(false);
+    runCinematicDemo();
+    return;
+  }
+  if (S.screen === "reading" && S.messages.length) {
+    rerenderAllMessages(); restoreQuickChips(); syncUI();
+  } else if (S.screen === "result" && S.output) {
+    renderResult(); syncUI();
+  } else {
+    S.screen = "landing";
+    syncUI();
+    initLandingTable(false);
+  }
+})();
+</script>
+</body>
+</html>
